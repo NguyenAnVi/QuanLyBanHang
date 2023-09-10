@@ -1,0 +1,7 @@
+{
+  "watch": [
+    "./*"
+  ],
+  "ext": ".js",
+  "exec": "cls & node ./index.js"
+}
