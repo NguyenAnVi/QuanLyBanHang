@@ -1,10 +1,11 @@
 import cors from "cors"
 import express from "express"
 import bodyParser from "body-parser"
-import router from "./routers/index.js"
 import cookieParser from "cookie-parser";
 import Locals from "./providers/local.js"
 import {Database} from "./providers/database.js"
+import customerRouter from "./routers/customer.router.js";
+import employeeRouter from "./routers/employee.router.js";
 
 const app = express()
 const db = new Database();
@@ -16,7 +17,8 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({extended:false}));
 
-app.use("/", router());
+app.use("/", customerRouter());
+app.use("/m", employeeRouter());
 
 app.use((req, res) => {
   return res.status(404).json({
