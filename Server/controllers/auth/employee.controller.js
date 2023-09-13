@@ -4,7 +4,7 @@ import EmployeeModel from '../../models/employee.model.js'
 import Locals from '../../providers/local.js'
 
 export const signin = async (req, res) => {
-  
+  console.log("signin");
   if (!req.body.phone || !req.body.password) {
     return res
       .status(422)

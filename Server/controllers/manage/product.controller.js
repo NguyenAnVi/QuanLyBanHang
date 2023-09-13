@@ -3,15 +3,64 @@ import Locals from "../../providers/local.js";
 import ProductModel from "../../models/product.model.js";
 import ProductImageModel from "../../models/productImage.model.js";
 
-export const add = async function (req, res, next) {
+const saveImages = async (newImages, product,oldImages=null) => {
+  const hostname = Locals.config().hostname;
+  const port = Locals.config().port;
+  const filepath = './public/storage/products/p_'+product.id+"/";
+  const publicpath = hostname + ':' + port + '/storage/products/p_'+product.id+"/";
+  Locals.config().createFolderIfNotExist(filepath);
+
+  for (let i = 0; i < newImages.length; i++) {
+    const image = newImages[i];
+    const imageBase64Data = image.split(',')[1];
+
+    const filename = `image_${i}.png`;
+    const fileUrl = filepath+filename;
+    const publicUrl = publicpath+filename;
+    writeFile(fileUrl, imageBase64Data, {
+      encoding:'base64',
+      flag:'w+'
+    }, function(werr) {
+      if(werr){
+        console.log(werr);
+        return res.status(500).json({
+          message:werr.message,
+        });
+      }
+    });
+
+    await new ProductImageModel({
+      name: product.name,
+      path: fileUrl,
+      publicPath: publicUrl,
+      productId: product.id
+    }).save()
+    .then(pi=>{
+      return 1;
+    })
+    .catch(err=>{
+      console.log(err)
+      return 0;
+      // return res.status(500).send({message:'error when save images'})
+    });
+    ;
+  }
+}
+
+export const add = async function (req, res) {
   const data = req.body.data;
   try {
-    const newProduct = await new ProductModel(data);
-    newProduct.save()
-    .then(p=> res.status(200).json({
-      message: "Product added",
-      product: newProduct
-    }))
+    await new ProductModel(data).save()
+    .then(async (p)=> {
+      if(data.images){
+        const images = JSON.parse(data.images);
+        await saveImages(images, p);
+      }
+      return res.status(200).json({
+        message: "Product added",
+        data: p
+      })
+    })
     .catch(err => res.status(500).json({message: err.message}));
   } catch (error) {
     return res.status(500).json({
@@ -19,7 +68,7 @@ export const add = async function (req, res, next) {
     });
   }
 }
-export const remove = async function (req, res, next) {
+export const remove = async function (req, res) {
   const id = req.params.id;
   try {
     await ProductModel.findByIdAndUpdate(id,{
@@ -91,7 +140,7 @@ export const uploadProductImage = async function (req, res, next) {
   });
 }
 
-export const get = async function (req, res, next) {
+export const get = async function (req, res) {
   const id = req.params.id;
   try {
     const product = await ProductModel.findById(id);
@@ -104,14 +153,16 @@ export const get = async function (req, res, next) {
     });
   }
 }
-export const getAllProduct = async function (req, res, next){
-  const quantity = req.query.quantity || 0;
+export const getAllProducts = async function (req, res){
+  console.log("getallProducts");
+  const quantity = req.query.quantity;
   try {
-    const products = await ProductModel.find(quantity);
+    const products = await ProductModel.find().limit(quantity);
     return res.status(200).json({
-      products,
+      data:products,
     });
   } catch (error) {
+    console.log(error.message);
     return res.status(500).json({
       message: error.message,
     });

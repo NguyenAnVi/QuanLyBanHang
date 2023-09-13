@@ -1,6 +1,6 @@
 import mongoose from "../providers/database.js"
 
-const ProductImageScheme = new mongoose.Schema(
+const ProductImageSchema = new mongoose.Schema(
   {
     name: {
       type: String,
@@ -19,5 +19,5 @@ const ProductImageScheme = new mongoose.Schema(
   { timestamps: true, collection: "ProductImages" }
 )
 
-const ProductImageModel = mongoose.model("ProductImages", ProductImageScheme)
+const ProductImageModel = mongoose.model("ProductImages", ProductImageSchema)
 export default ProductImageModel

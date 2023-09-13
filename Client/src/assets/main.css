@@ -1,0 +1,19 @@
+@import url(./colortheme.css);
+html::-webkit-scrollbar{
+  display: none;
+}
+*{
+  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}
+body, #app {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+a{
+  cursor: pointer;
+  text-decoration: none;
+}
+a, a:visited{
+  color: unset;
+}
