@@ -1,22 +1,24 @@
-import HomeView from '@/views/customer/HomeView.vue';
 import Signin from '@/views/customer/authentication/Signin.vue';
 import Signup from '@/views/customer/authentication/Signup.vue';
 export default [
   {
     path: '/c',
-    name: 'Customer Home',
+    name: 'c',
+    title: 'Customer Home',
     icon: 'house',
-    showInSideBar: true,
-    component: HomeView
+    showInSideBar: 'c',
+    component: import('@/views/customer/HomeView.vue')
   },
   {
     path: '/c/signin',
-    name: 'Customer Signin',
+    name: 'c.signin',
+    title: 'Customer Signin',
     component: Signin
   },
   {
     path: '/c/signup',
-    name: 'Customer Signup',
+    name: 'c.signup',
+    title: 'Customer Signup',
     component: Signup
   },
 ]

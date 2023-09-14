@@ -1,9 +1,12 @@
 <script>
 import * as yup from "yup";
+import { useStore } from "vuex";
+import { useRoute } from "vue-router";
 import { useToast } from "vue-toastification";
-import { ref } from "vue";
+import { reactive, ref } from "vue";
 import { Form, Field, ErrorMessage } from "vee-validate";
 
+import ConfirmDialog from "@/components/ConfirmDialog.vue";
 import UploadImage from "@/components/UploadImage.vue";
 import PreviewImages from "@/components/PreviewImages.vue";
 import InputTypeFile from "@/components/InputTypeFile.vue";
@@ -27,21 +30,61 @@ export default {
     ErrorMessage,
     InputTypeFile,
     UploadImage,
-    PreviewImages
+    PreviewImages,
+    ConfirmDialog
   },
-  data() {
-    return {
-      title: document.title,
-      imagesArr: [],
-      thumbnailUrl: "",
-      thumbnailPreviewSrc: "",
-      isThumbnailFileSelected: false,
-      isEditorSaved: true,
-      isProcessing: ref(false),
-      description: "",
-    };
-  },
-  setup() {
+  async setup() {
+    const p = reactive({
+      _id: "",
+      roduct: {},
+      oldimages: [],
+      oldimagesources: []
+    });
+    const route = useRoute();
+    const store = useStore();
+    p._id = route.params.id;
+
+    await store.dispatch("product/getEdit", {
+      id: p._id
+    })
+      .then(
+        async (product) => {
+          p.roduct = product;
+        }
+      )
+      .catch(
+        error => {
+          toast(error || error.message, { type: "error" });
+          p.roduct = {
+            _id: "",
+            name: "",
+            description: "",
+            price: 0,
+            quantity: 0,
+            note: "",
+            description: ""
+          };
+        }
+      );
+    await store.dispatch("product/getEditImages", {
+      id: p._id
+    })
+      .then(
+        async (images) => {
+          images.forEach(img => {
+            p.oldimagesources.push(img.publicPath);
+            p.oldimages.push(img);
+          })
+          p.oldimages = images;
+        }
+      )
+      .catch(
+        error => {
+          toast(error || error.message, { type: "error" });
+          p.oldimages = [];
+        }
+      );
+
     const modules = {
       name: 'htmlEditButton',
       module: QuillHTMLEditButton,
@@ -50,7 +93,22 @@ export default {
       },
     };
 
-    return { modules };
+    return { modules, p };
+  },
+  data() {
+    return {
+      product: this.p.roduct,
+      title: document.title,
+      imagesArr: [],
+      oldImagesDocArr: this.p.oldimages,
+      oldImageSourcesArr: this.p.oldimagesources,
+      thumbnailUrl: "",
+      thumbnailPreviewSrc: "",
+      isThumbnailFileSelected: false,
+      isEditorSaved: true,
+      isProcessing: ref(false),
+      description: "",
+    };
   },
   methods: {
     async onEditorChangeHandler() {
@@ -70,12 +128,20 @@ export default {
     },
     async submitHandler(product) {
       this.isProcessing = true;
-
-      await this.$store.dispatch("product/add", product)
+      await this.$store.dispatch("product/edit", {
+        id: this.p._id,
+        product
+      })
         .then((res) => {
           this.isProcessing = false;
-          // this.$router.push('/m/product');
-          toast(res.message, { type: "success" });
+
+          this.$emit('notification', res.message)
+          this.$router.push({ name: "m.product" });
+          // this.$store.dispatch('notification/createNotification', {
+          //   message: res.message,
+          //   type: "success"
+          // }).then(() => {
+          // });
         })
         .catch((error) => {
           this.isProcessing = false;
@@ -93,20 +159,40 @@ export default {
     openImageUploadModal() {
       document.getElementById('uploadImageModal').style.display = 'block';
     },
-    // closeModal() {
-    //   document.getElementById('uploadImageModal').style.display = 'none';
-    // },
     addNewImage(newImgData) {
       let tArr = this.imagesArr;
       tArr.push(newImgData)
       this.imagesArr = tArr;
-      // this.closeModal();
       this.$refs.uploadImageModal.hide();
     },
     deleteImage(index) {
-      let tArr = this.imagesArr;
-      tArr.splice(index, 1);
-      this.imagesArr = tArr;
+      if (index > this.oldImageSourcesArr.length) {
+        let tArr = this.imagesArr;
+        tArr.splice(index - this.oldImageSourcesArr.length, 1);
+        this.imagesArr = tArr;
+      } else {
+        // confirm delete productImage
+        this.$refs.confirmDialog.show("Are you sure you want to delete?", index)
+      }
+    },
+    deleteOldProductImage(index) {
+      this.$store.dispatch("product/deleteProductImage", {
+        id: this.oldImagesDocArr[index]._id
+      })
+        .then((res) => {
+          this.oldImagesDocArr.splice(index, 1);
+          this.oldImageSourcesArr.splice(index, 1);
+          toast("res.message", { type: "success" })
+        })
+        .catch((error) => {
+          this.message =
+            (error.response &&
+              error.response?.data &&
+              error.response?.data.message) ||
+            error.message ||
+            error.toString();
+          toast(error.response?.data.message || error.message, { type: "error" });
+        });
     }
   },
   computed: {
@@ -147,10 +233,29 @@ export default {
         imagesInput.value = JSON.stringify(newImages);
         imagesInput.dispatchEvent(new Event('change'));
       }
+    },
+    oldImageSourcesArr: {
+      intermediate: true,
+      deep: true,
+      handler: function (newImages) {
+        const imagesInput = document.getElementById('oldimages');
+        imagesInput.value = JSON.stringify(newImages);
+        imagesInput.dispatchEvent(new Event('change'));
+      }
+    }
+  },
+  created() {
+    const toast = useToast();
+    console.log(this.$store.getters['notification/hasNotification']);
+    if (this.$store.getters['notification/hasNotification']) {
+      toast(this.$store.state.notification.message, { type: this.$store.state.notification.type });
     }
   },
   mounted() {
-    document.getElementById('uploadImageModal').style.display = 'none';
+    // document.getElementById('uploadImageModal').style.display = 'none';
+    if (this.p.roduct.description) {
+      this.$refs.quillEditor.pasteHTML(this.p.roduct.description);
+    }
   }
 };
 </script>
@@ -164,18 +269,20 @@ export default {
           <h3>Product Information</h3>
           <div class="cell-wrapper">
             <label for="name">Product name</label>
-            <Field type="text" ref="name" id="name" placeholder name="name" />
+            <Field type="text" ref="name" id="name" :value="product.name" placeholder="Product A" name="name" />
             <ErrorMessage name="name" />
           </div>
           <div class="horizontal">
             <div class="cell-wrapper">
               <label for="name">Product price</label>
-              <Field type="number" step="1000" min="0" ref="price" id="price" placeholder name="price" />
+              <Field type="number" step="1000" min="0" ref="price" :value="product.price" id="price" placeholder
+                name="price" />
               <ErrorMessage name="price" />
             </div>
             <div class="cell-wrapper">
               <label for="name">Product quantity</label>
-              <Field type="number" step="1" min="0" ref="quantity" id="quantity" placeholder name="quantity" />
+              <Field type="number" step="1" min="0" ref="quantity" :value="product.quantity" id="quantity" placeholder
+                name="quantity" />
               <ErrorMessage name="quantity" />
             </div>
           </div>
@@ -191,14 +298,14 @@ export default {
               <div id="quillLoaded" v-else class="lds-ring checked"></div>
             </label>
 
-            <QuillEditor ref="quillEditor" id="quillEditor" theme="snow" toolbar="full" :modules="modules"
-              v-model:content="description" @textChange="onEditorChangeHandler" />
-            <Field type="text" ref="description" id="description" name="description" />
+            <QuillEditor id="quillEditor" ref="quillEditor" theme="snow" :modules="modules" v-model:content="description"
+              @textChange="onEditorChangeHandler" />
+            <Field type="hidden" ref="description" id="description" name="description" />
             <!-- <ErrorMessage name="description" /> -->
           </div>
           <div class="cell-wrapper">
             <label for="name">Note</label>
-            <Field type="text" ref="note" id="note" placeholder name="note" />
+            <Field type="text" ref="note" :value="product.note" id="note" placeholder name="note" />
             <ErrorMessage name="note" />
           </div>
         </div>
@@ -207,8 +314,10 @@ export default {
           <div class="cell-wrapper">
             <label for="name">Choose Files</label>
             <button type="button" class="button" @click="openImageUploadModal">Add image</button>
-            <PreviewImages id="previewImages" :images="imagesArr" @deleteImage="deleteImage" />
+            <PreviewImages id="previewImages" :images="[...oldImageSourcesArr, ...imagesArr]"
+              @deleteImage="deleteImage" />
             <Field type="hidden" ref="images" id="images" placeholder name="images" />
+            <Field type="hidden" ref="oldimages" id="oldimages" placeholder name="oldimages" />
             <ErrorMessage name="name" />
           </div>
 
@@ -224,7 +333,7 @@ export default {
                 <div></div>
               </div>
               <font-awesome-icon v-else icon="cloud-arrow-up" />
-              Upload
+              Save Changes
             </button>
           </div>
         </div>
@@ -232,8 +341,9 @@ export default {
       <div class="section-wrapper" v-show="!currentUser">
         You need to signin to perform this action
       </div>
-      <UploadImage ref="uploadImageModal" @submitCroppedImage="addNewImage" :aspectRatio="1" id="uploadImageModal" />
     </div>
+    <ConfirmDialog @confirmed="deleteOldProductImage" :countdown="1" ref="confirmDialog"></ConfirmDialog>
+    <UploadImage ref="uploadImageModal" @submitCroppedImage="addNewImage" :aspectRatio="1" id="uploadImageModal" />
   </main>
 </template>
 
@@ -350,18 +460,6 @@ main {
   }
 }
 
-#uploadImageModal {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  padding-top: 5%;
-  margin-left: auto;
-  margin-right: auto;
-  display: none;
-  z-index: 1000;
-  background-color: rgba(255, 255, 255, 0.253);
-  box-sizing: border-box;
-}
 
 input {
   width: fit-content;

@@ -7,19 +7,26 @@ export default {
     RouterLink,
     ProductListItem
   },
-  data(){
+  data() {
+    const title = document.title;
     const headerItem = {
-      name:"Name",
-      quantity:"Quantity",
-      price:"Price",
-      actions:"Actions"
+      name: "Name",
+      quantity: "Quantity",
+      price: "Price",
+      actions: "Actions"
     }
     return {
+      title,
       headerItem,
     }
   },
+  methods: {
+    editProductHandler(id) {
+      this.$router.push({ name: "m.product.edit", params: { id: id } })
+    }
+  },
   computed: {
-    productItems(){
+    productItems() {
       return JSON.parse(JSON.stringify(this.$store.getters['product/productItems']));
     }
   },
@@ -30,30 +37,33 @@ export default {
 </script>
 <template>
   <div class="container is-fluid">
-    <h3>{{$route.name}}</h3>
-    <hr/>
+    <h3>{{ title }}</h3>
+    <hr />
     <RouterLink to="/m/product/add"><button>Add new product</button></RouterLink>
     <div class="is-ancestor">
       <div class="is-parent">
-        <ProductListItem header :productItem="headerItem"/>
-        <ProductListItem  v-for="productItem in productItems" :key="productItem.id" :productItem="productItem"/>
+        <ProductListItem header :productItem="headerItem" />
+        <ProductListItem @edit="editProductHandler" v-for="productItem in productItems" :key="productItem.id"
+          :productItem="productItem" />
       </div>
     </div>
   </div>
 </template>
 <style scoped>
-.container{
-  padding:16px;
+.container {
+  padding: 16px;
   background-color: transparent;
 }
-.is-ancestor{
+
+.is-ancestor {
   background-color: transparent;
-  padding:8px;
+  padding: 8px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
 }
-.is-parent{
+
+.is-parent {
   width: 100%;
 
   display: table;
@@ -62,11 +72,13 @@ export default {
   border: 1px solid #888888;
   gap: 8px;
   row-gap: 8px;
-  & > *:nth-child(odd){
-    background-color:#d6d6d6; 
+
+  &>*:nth-child(odd) {
+    background-color: #d6d6d6;
   }
-  & > *:nth-child(even){
-    background-color:#ffffff; 
+
+  &>*:nth-child(even) {
+    background-color: #ffffff;
   }
 }
 </style>

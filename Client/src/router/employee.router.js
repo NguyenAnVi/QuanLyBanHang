@@ -1,36 +1,42 @@
-import HomeView from '@/views/employee/HomeView.vue';
-import Signin from '@/views/employee/authentication/Signin.vue';
-import Signup from '@/views/employee/authentication/Signup.vue';
-import ProductList from '@/views/employee/product/ProductList.vue';
-import ProductAdd from '@/views/employee/product/ProductAdd.vue';
 export default [
   {
     path: '/m',
-    name: 'Employee Home',
+    name: 'm',
+    title: 'Employee Home',
     icon: 'house',
     showInSideBar: 'm',
-    component: HomeView
+    component: () => import('@/views/employee/HomeView.vue')
   },
   {
     path: '/m/signin',
-    name: 'Employee Signin',
-    component: Signin
+    name: 'm.signin',
+    title: 'Signin',
+    component: () => import('@/views/employee/authentication/Signin.vue')
   },
   {
     path: '/m/signup',
-    name: 'Employee Signup',
-    component: Signup
+    name: 'm.signup',
+    title: 'Signup',
+    component: () => import('@/views/employee/authentication/Signup.vue')
   },
   {
     path: '/m/product',
-    name: 'Product List',
+    name: 'm.product',
+    title: 'Product management',
     icon: 'house',
-    component: ProductList,
-    showInSideBar: 'm'
+    showInSideBar: 'm',
+    component: () => import('@/views/employee/product/ProductList.vue')
   },
   {
     path: '/m/product/add',
-    name: 'Product Add',
-    component: ProductAdd,
+    name: 'm.product.add',
+    title: 'Add new product',
+    component: () => import('@/views/employee/product/ProductAdd.vue')
+  },
+  {
+    path: '/m/product/edit/:id',
+    name: 'm.product.edit',
+    title: 'Edit product',
+    component: () => import('@/views/employee/product/ProductEdit.vue')
   },
 ]

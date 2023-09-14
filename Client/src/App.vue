@@ -4,23 +4,31 @@ import { routes as routerRoutes } from "./router/index.js";
 import { RouterLink, RouterView } from "vue-router";
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faBars, faUser, faArrowRightFromBracket, faHouse, faCloudArrowUp, faGear } from '@fortawesome/free-solid-svg-icons';
+import { useToast } from "vue-toastification";
 
+const toast = useToast();
 library.add(faBars, faUser, faArrowRightFromBracket, faHouse, faCloudArrowUp, faGear);
 
 export default {
-  components:{
-    NavNavbar:'nav-navbar',
-    NavSidebar:'nav-sidebar',
+  components: {
+    NavNavbar: 'nav-navbar',
+    NavSidebar: 'nav-sidebar',
     Suspense,
     Transition
   },
-  data(){
-    return{
+  data() {
+    return {
       routerRoutes,
       avtSrc: "http://localhost:3001/account.png",
     }
   },
-  mounted: function (){
+  watch: {
+    '$route'(to, from) {
+      const title = this.routerRoutes.filter(r => (r.name === to.name))[0].title;
+      document.title = title;
+    }
+  },
+  mounted: function () {
     const sidebar = document.getElementById("sidebar");
     const openSideBar = (sb) => {
       sb.classList.add("opened");
@@ -29,18 +37,18 @@ export default {
       sb.classList.remove("opened");
     };
     const toggleSideBar = (sb) => {
-      if(sb.classList.contains("opened"))
+      if (sb.classList.contains("opened"))
         closeSideBar(sb);
       else
         openSideBar(sb);
     };
     const logo = document.getElementById("sidebar-toggler");
-    logo.addEventListener('click', ()=>{
+    logo.addEventListener('click', () => {
       toggleSideBar(sidebar);
     });
     this.updateAvatar();
   },
-  computed:{
+  computed: {
     cartQuantity() {
       return this.$store.getters["cart/cartQuantity"]
     },
@@ -68,10 +76,10 @@ export default {
   methods: {
     isValidImage(url) {
       return new Promise((resolve, reject) => {
-          let image = new Image();
-          image.onload = () => resolve(true);
-          image.onerror = () => resolve(false);
-          image.src = url;
+        let image = new Image();
+        image.onload = () => resolve(true);
+        image.onerror = () => resolve(false);
+        image.src = url;
       });
     },
     logOutC() {
@@ -84,18 +92,21 @@ export default {
       this.$store.state.userE.user = undefined;
       this.$router.push('/m');
     },
-    updateAvatar(){
+    updateAvatar() {
       this.avtSrc = "http://localhost:3001/account.png";
       const newAvtSrc = JSON.parse(localStorage.getItem('user'))?.avatar || this.avtSrc;
       this.isValidImage(newAvtSrc).then(isValid => {
         if (isValid) {
           // The image is valid
-          this.avtSrc = newAvtSrc+"?timestamp="+Date.now();
+          this.avtSrc = newAvtSrc + "?timestamp=" + Date.now();
         }
       });
+    },
+    createNotification(message, type = "default") {
+      toast(message, type)
     }
   },
-  created(){
+  created() {
     this.$store.dispatch("cart/getCartItems");
   }
 }
@@ -103,118 +114,116 @@ export default {
 
 <template>
   <div>
-   <div id="appWrapper">
-     <div id="header">
-      <div>
-        <font-awesome-icon id="sidebar-toggler" :icon="['fas', 'bars']" size="lg" />
-        <img
-            id="logo"
-            alt="logo"
-            class="logo"
-            src="@/assets/logo.svg"
-        />
-        <span style="color:rgb(0, 141, 96); font-size: larger; font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;">QUANLYBANHANG</span>
+    <div id="appWrapper">
+      <div id="header">
+        <div>
+          <font-awesome-icon id="sidebar-toggler" :icon="['fas', 'bars']" size="lg" />
+          <img id="logo" alt="logo" class="logo" src="@/assets/logo.svg" />
+          <span
+            style="color:rgb(0, 141, 96); font-size: larger; font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;">QUANLYBANHANG</span>
+        </div>
+        <div>
+          <input type="text" name="search" id="search" placeholder="Search ...">
+        </div>
+        <nav-navbar>
+          <div class="user-menu" v-if="!currentUserC && $route.fullPath[1] === 'c'">
+            <div class="menu-label">
+              <img class="user-avatar" src="http://127.0.0.1:3001/account.png" alt="">
+              <a href="#" class="user-text">Signin/Signup</a>
+            </div>
+            <ul>
+              <li>
+                <RouterLink to="/c/signin">Signin</RouterLink>
+              </li>
+              <li>
+                <RouterLink to="/c/signup">Signup</RouterLink>
+              </li>
+            </ul>
+          </div>
+          <div class="user-menu" v-if="!currentUserE && $route.fullPath[1] === 'm'">
+            <div class="menu-label">
+              <img class="user-avatar" src="http://127.0.0.1:3001/account.png" alt="">
+              <a href="#" class="user-text">Signin/Signup</a>
+            </div>
+            <ul>
+              <li>
+                <RouterLink to="/m/signin">Signin</RouterLink>
+              </li>
+              <li>
+                <RouterLink to="/m/signup">Signup</RouterLink>
+              </li>
+            </ul>
+          </div>
+          <div class="user-menu" v-if="currentUserE && $route.fullPath[1] === 'm'">
+            <div class="menu-label">
+              <img ref="useravatar" class="user-avatar" :src="avtSrc" alt="">
+              <a href="#" class="user-text">{{ currentUserE.name }}</a>
+            </div>
+            <ul>
+              <li>
+                <RouterLink to="/settings">
+                  <div>Settings</div>
+                </RouterLink>
+              </li>
+              <li @click="logOutE">
+                Sign Out
+              </li>
+            </ul>
+          </div>
+          <div class="user-menu" v-if="currentUserC && $route.fullPath[1] === 'c'">
+            <div class="menu-label">
+              <img ref="useravatar" class="user-avatar" :src="avtSrc" alt="">
+              <a href="#" class="user-text">{{ currentUserC.name }}</a>
+            </div>
+            <ul>
+              <li>
+                <RouterLink to="/settings">
+                  <div>Settings</div>
+                </RouterLink>
+              </li>
+              <li @click="logOutC">
+                Sign Out
+              </li>
+            </ul>
+          </div>
+          <div class="user-menu" v-if="$route.fullPath[1] === 'c'">
+            <div class="menu-label">
+              <img class="user-avatar" src="http://127.0.0.1:3001/cart.png" alt="">
+              <a href="#" class="user-text">Cart: {{ cartQuantity }}</a>
+            </div>
+            <ul>
+              <li>
+                <RouterLink to="/c/signin">Signin</RouterLink>
+              </li>
+              <li>
+                <RouterLink to="/c/signup">Signup</RouterLink>
+              </li>
+            </ul>
+          </div>
+        </nav-navbar>
       </div>
-      <div>
-        <input type="text" name="search" id="search" placeholder="Search ...">
+      <div id="body">
+        <div id="sidebar" class="" ref="sidebar">
+          <nav-sidebar>
+            <!-- {{ routerRoutes }} -->
+            <RouterLink v-for="route in routerRoutes" v-show="route.showInSideBar === $route.fullPath[1]"
+              :to="route.path">
+              <font-awesome-icon v-if="route.icon" :icon="route.icon" />
+              <div>{{ route.title }}</div>
+            </RouterLink>
+          </nav-sidebar>
+        </div>
+        <div id="content">
+          <Suspense>
+            <RouterView @updateAvatar="updateAvatar" @notification="createNotification" v-slot="{ Component }">
+              <Transition name="fade" mode="out-in">
+                <component :is="Component" />
+              </Transition>
+            </RouterView>
+          </Suspense>
+        </div>
       </div>
-      <nav-navbar>
-        <div class="user-menu" v-if="!currentUserC && $route.fullPath[1]==='c'">
-          <div class="menu-label">
-            <img class="user-avatar" src="http://127.0.0.1:3001/account.png" alt="">
-            <a href="#" class="user-text">Signin/Signup</a>
-          </div>
-          <ul>
-            <li>
-              <RouterLink to="/c/signin">Signin</RouterLink>
-            </li>
-            <li>
-              <RouterLink to="/c/signup">Signup</RouterLink>
-            </li>
-          </ul>
-        </div>
-        <div class="user-menu" v-if="!currentUserE && $route.fullPath[1]==='m'">
-          <div class="menu-label">
-            <img class="user-avatar" src="http://127.0.0.1:3001/account.png" alt="">
-            <a href="#" class="user-text">Signin/Signup</a>
-          </div>
-          <ul>
-            <li>
-              <RouterLink to="/m/signin">Signin</RouterLink>
-            </li>
-            <li>
-              <RouterLink to="/m/signup">Signup</RouterLink>
-            </li>
-          </ul>
-        </div>
-        <div class="user-menu" v-if="currentUserE && $route.fullPath[1]==='m'">
-          <div class="menu-label">
-            <img ref="useravatar" class="user-avatar" :src="avtSrc" alt="">
-            <a href="#" class="user-text">{{ currentUserE.name }}</a>
-          </div>
-          <ul>
-            <li>
-              <RouterLink to="/settings">
-                <div>Settings</div>
-              </RouterLink>
-            </li>
-            <li @click="logOutE">
-              Sign Out
-            </li>
-          </ul>
-        </div>
-        <div class="user-menu" v-if="currentUserC && $route.fullPath[1]==='c'">
-          <div class="menu-label">
-            <img ref="useravatar" class="user-avatar" :src="avtSrc" alt="">
-            <a href="#" class="user-text">{{ currentUserC.name }}</a>
-          </div>
-          <ul>
-            <li>
-              <RouterLink to="/settings">
-                <div>Settings</div>
-              </RouterLink>
-            </li>
-            <li @click="logOutC">
-              Sign Out
-            </li>
-          </ul>
-        </div>
-        <div class="user-menu" v-if="$route.fullPath[1]==='c'">
-          <div class="menu-label">
-            <img class="user-avatar" src="http://127.0.0.1:3001/cart.png" alt="">
-            <a href="#" class="user-text">Cart: {{cartQuantity}}</a>
-          </div>
-          <ul>
-            <li>
-              <RouterLink to="/c/signin">Signin</RouterLink>
-            </li>
-            <li>
-              <RouterLink to="/c/signup">Signup</RouterLink>
-            </li>
-          </ul>
-        </div>
-      </nav-navbar>
-    </div>
-    <div id="body">
-      <div id="sidebar" class="" ref="sidebar">
-        <nav-sidebar>
-          <RouterLink v-for="route in routerRoutes" v-show="route.showInSideBar === $route.fullPath[1]" :to="route.path">
-            <font-awesome-icon v-if="route.icon" :icon="route.icon"/>
-            <div>{{ route.name }}</div>
-          </RouterLink>
-        </nav-sidebar>
-      </div>
-      <div id="content">
-        <Suspense>
-          <RouterView @updateAvatar="updateAvatar" v-slot="{ Component }">
-            <Transition name="fade" mode="out-in">
-              <component :is="Component"/>
-            </Transition>
-          </RouterView>
-        </Suspense>
-      </div>
-     </div>
-     <div id="footer">
+      <div id="footer">
         <div>
           <RouterLink to="/about">About</RouterLink>
         </div>
@@ -224,28 +233,32 @@ export default {
         <div>
           @nguyenanvi122333
         </div>
-     </div>
-   </div>
- </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <style>
 @import url(@/assets/colortheme.css);
-:root{
-  --icon-width:30px;
-  --header-height:45px;
-  --footer-height:50px;
+
+:root {
+  --icon-width: 30px;
+  --header-height: 45px;
+  --footer-height: 50px;
   --sidebar-icon-width: 48px;
   --sidebar-width: 200px;
 }
+
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
 }
+
 .fade-enter-active,
-.fade-leave-active{
+.fade-leave-active {
   transition: opacity .5s ease-out;
 }
+
 #appWrapper {
   margin: 8px;
   padding: 8px;
@@ -254,30 +267,35 @@ export default {
   flex-direction: column;
   gap: 8px;
 
-   /* Set a specified height, or the minimum height for the background image */
-  
+  /* Set a specified height, or the minimum height for the background image */
+
   /* Set background image to fixed (don't scroll along with the page) */
   background-attachment: fixed;
-  
+
   /* Center the background image */
   background-position: center;
-  
+
   /* Set the background image to no repeat */
   background-repeat: no-repeat;
-  
+
   /* Scale the background image to be as large as possible */
   background-size: cover;
   background-image: url(@public/background.jpg);
   border-radius: 8px;
 }
-#header, #body, #footer{
+
+#header,
+#body,
+#footer {
   box-sizing: border-box;
   /* box-shadow: inset 0 0 3px var(--color-background-5); */
   border-radius: 8px;
 }
-#sidebar-toggler{
+
+#sidebar-toggler {
   width: var(--sidebar-icon-width);
 }
+
 #header {
   display: flex;
   align-items: center;
@@ -289,16 +307,18 @@ export default {
 
   background-color: var(--color-background-1);
 
-  & > *{
+  &>* {
     display: flex;
     align-items: center;
-    flex: 1 0 0px ;
+    flex: 1 0 0px;
     gap: 8px;
     justify-content: center;
-    &:first-child{
+
+    &:first-child {
       justify-content: start;
     }
-    & > #search{
+
+    &>#search {
       width: 100%;
       padding: 8px 24px;
       background-color: transparent;
@@ -307,7 +327,7 @@ export default {
       line-height: 8px;
       color: #575756;
       background-color: transparent;
-      background-image:url(./assets/search.svg);
+      background-image: url(./assets/search.svg);
       background-repeat: no-repeat;
       background-size: 18px 18px;
       background-position: 95% center;
@@ -325,12 +345,15 @@ export default {
       -ms-border-radius: 50px;
       -o-border-radius: 50px;
     }
-    & > #search::placeholder{
+
+    &>#search::placeholder {
       color: rgba(87, 87, 86, 0.8);
       text-transform: uppercase;
       letter-spacing: 1.5px;
     }
-    & > #search:hover, #search:focus{
+
+    &>#search:hover,
+    #search:focus {
       padding: 12px 12px;
       outline: 0;
       border: 1px solid transparent;
@@ -344,10 +367,11 @@ export default {
     }
   }
 
-  & > nav-navbar{
+  &>nav-navbar {
     justify-content: end;
     display: block;
-    & > *{
+
+    &>* {
       float: right;
       background-color: var(--color-background-2);
       border-radius: 8px;
@@ -357,34 +381,36 @@ export default {
       -o-border-radius: 8px;
       border: 1px solid var(--color-text-1);
     }
-    & > .user-menu{
+
+    &>.user-menu {
       width: 140px;
       height: 32px;
       display: block;
       overflow: hidden;
       border-radius: 16px;
-      
-      &>*{
+
+      &>* {
         z-index: 10;
         width: inherit;
         height: inherit;
       }
 
-      & > .menu-label{
+      &>.menu-label {
         height: inherit;
         display: flex;
         justify-content: space-between;
         align-items: center;
         background-color: #fff;
 
-        & > .user-avatar{
+        &>.user-avatar {
           border-radius: 50%;
           overflow: hidden;
           width: 25px;
           height: 25px;
           padding: 5px;
         }
-        & > .user-text{
+
+        &>.user-text {
           text-align: center;
           overflow: hidden;
           font-size: 12px;
@@ -396,7 +422,8 @@ export default {
           color: #000;
         }
       }
-      & > ul{
+
+      &>ul {
         height: auto;
         padding: 0;
         margin: 0;
@@ -410,7 +437,7 @@ export default {
         transition-duration: .2s;
         transition-timing-function: ease-in-out;
 
-        & > li{
+        &>li {
           padding: 4px 8px;
           display: flex;
           align-items: center;
@@ -418,21 +445,25 @@ export default {
           cursor: pointer;
           background-color: #ffffff;
           color: #000;
-          &:first-child{
+
+          &:first-child {
             border-top-left-radius: 8px;
             border-top-right-radius: 8px;
           }
-          &:last-child{
+
+          &:last-child {
             border-bottom-left-radius: 8px;
             border-bottom-right-radius: 8px;
           }
         }
       }
-      &:hover{
-        & > ul{
+
+      &:hover {
+        &>ul {
           display: flex;
           flex-direction: column;
-          & > li:hover{
+
+          &>li:hover {
             color: #fff;
             background-color: #000000;
           }
@@ -441,6 +472,7 @@ export default {
     }
   }
 }
+
 #body {
   display: flex;
   justify-items: stretch;
@@ -449,7 +481,8 @@ export default {
   background-color: transparent;
   min-height: calc(100vh - var(--header-height) - var(--footer-height) - 48px);
 }
-#sidebar{
+
+#sidebar {
   box-sizing: border-box;
   overflow: hidden;
   min-width: var(--sidebar-icon-width);
@@ -463,20 +496,25 @@ export default {
   transition-duration: .5s;
   transition-timing-function: ease-in-out;
 }
-#sidebar.opened, #sidebar:hover{
+
+#sidebar.opened,
+#sidebar:hover {
   min-width: var(--sidebar-width);
   width: var(--sidebar-width);
 }
-#content{
-  flex-shrink:0;
+
+#content {
+  flex-shrink: 0;
   background-color: #ffffff77;
   backdrop-filter: blur(10px);
-  width:  calc(100% - var(--sidebar-icon-width) - 8px);
-  & > *:first-child{
+  width: calc(100% - var(--sidebar-icon-width) - 8px);
+
+  &>*:first-child {
     min-height: 100%;
     box-sizing: border-box;
   }
 }
+
 #footer {
   height: var(--footer-height);
   border-top: 1px solid var(--color-border);
@@ -509,7 +547,8 @@ nav-sidebar {
   -ms-border-radius: 8px 0 0 8px;
   -o-border-radius: 8px 0 0 8px;
 }
-nav-sidebar > a {
+
+nav-sidebar>a {
   border-radius: 8px 0 0 8px;
   background-color: #ffffff88;
   display: flexbox;
@@ -520,48 +559,55 @@ nav-sidebar > a {
   transition-duration: .2s;
   transition-timing-function: ease-in-out;
 
-  &:hover{
+  &:hover {
     z-index: 2;
   }
-  &:focus{
+
+  &:focus {
     z-index: 1;
   }
-  &:hover, &:focus, &.router-link-exact-active{
+
+  &:hover,
+  &:focus,
+  &.router-link-exact-active {
     height: calc(var(--sidebar-icon-width) + 16px);
     box-shadow: 0 0 5px var(--color-background-5);
     background-color: #fff;
   }
 }
-nav-sidebar > a.router-link-exact-active {
+
+nav-sidebar>a.router-link-exact-active {
   border-radius: 8px 0 0 8px;
   -webkit-border-radius: 8px 0 0 8px;
   -moz-border-radius: 8px 0 0 8px;
   -ms-border-radius: 8px 0 0 8px;
   -o-border-radius: 8px 0 0 8px;
-  
-  &:hover{
+
+  &:hover {
     cursor: default;
   }
 }
 
-nav-sidebar > a {
+nav-sidebar>a {
   display: flex;
-  }
+}
 
-nav-sidebar > a > div{
+nav-sidebar>a>div {
   display: inline-block;
 }
 
-nav-sidebar > a > svg{
+nav-sidebar>a>svg {
   width: var(--sidebar-icon-width);
   height: 100%;
   align-items: center;
   box-sizing: border-box;
 }
-#footer > * {
+
+#footer>* {
   flex: 1 1 1px;
   text-align: center;
 }
+
 @media only screen and (max-width: 720px) {
   #appWrapper {
     margin: 0;

@@ -1,4 +1,4 @@
-import { writeFile } from "fs";
+import { unlinkSync, writeFile } from "fs";
 import Locals from "../../providers/local.js";
 import ProductModel from "../../models/product.model.js";
 import ProductImageModel from "../../models/productImage.model.js";
@@ -14,7 +14,7 @@ const saveImages = async (newImages, product,oldImages=null) => {
     const image = newImages[i];
     const imageBase64Data = image.split(',')[1];
 
-    const filename = `image_${i}.png`;
+    const filename = `image_${i}_${Date.now()}.png`;
     const fileUrl = filepath+filename;
     const publicUrl = publicpath+filename;
     writeFile(fileUrl, imageBase64Data, {
@@ -22,7 +22,7 @@ const saveImages = async (newImages, product,oldImages=null) => {
       flag:'w+'
     }, function(werr) {
       if(werr){
-        console.log(werr);
+        throw(werr);
         return res.status(500).json({
           message:werr.message,
         });
@@ -39,12 +39,25 @@ const saveImages = async (newImages, product,oldImages=null) => {
       return 1;
     })
     .catch(err=>{
-      console.log(err)
+      throw(err)
       return 0;
       // return res.status(500).send({message:'error when save images'})
     });
     ;
   }
+}
+
+export const deleteImage = async function (req, res) {
+  const id = req.params.id;
+  await ProductImageModel.findByIdAndDelete(id)
+  .then(async pi=>{
+    const filePath = pi.path;
+    unlinkSync(filePath);
+    return res.status(200).json({
+      message: "Image deleted",
+    });
+  })
+  .catch(err=>res.status(500).send({message: err.message}));
 }
 
 export const add = async function (req, res) {
@@ -62,6 +75,28 @@ export const add = async function (req, res) {
       })
     })
     .catch(err => res.status(500).json({message: err.message}));
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
+}
+export const edit = async function (req, res) {
+  const id = req.body.id;
+  const data = req.body.data;
+  try {
+    await ProductModel.findByIdAndUpdate(id, data)
+      .then(async (p)=>{
+        if(data.images){
+          const images = JSON.parse(data.images);
+          await saveImages(images, p);
+        }
+        return res.status(200).json({
+          message: "Product updated",
+          data: p
+        })
+      })
+      .catch(err => res.status(500).json({message: err.message}));
   } catch (error) {
     return res.status(500).json({
       message: error.message,
@@ -122,7 +157,7 @@ export const uploadProductImage = async function (req, res, next) {
       flag:'w'
     }, function(werr) {
       if(werr){
-        console.log(werr);
+        throw(werr);
         return res.status(500).json({
           message:werr.message,
         });
@@ -153,8 +188,22 @@ export const get = async function (req, res) {
     });
   }
 }
+export const getImages = async function (req, res) {
+  const id = req.params.id;
+  try {
+    const images = await ProductImageModel.find({
+      productId: id
+    });
+    return res.status(200).json({
+      images,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
+}
 export const getAllProducts = async function (req, res){
-  console.log("getallProducts");
   const quantity = req.query.quantity;
   try {
     const products = await ProductModel.find().limit(quantity);
@@ -162,7 +211,6 @@ export const getAllProducts = async function (req, res){
       data:products,
     });
   } catch (error) {
-    console.log(error.message);
     return res.status(500).json({
       message: error.message,
     });
@@ -187,7 +235,7 @@ export const getAllProducts = async function (req, res){
 //       flag:'w+'
 //     }, function(werr) {
 //       if(werr){
-//         console.log(werr);
+//         throw(werr);
 //         return res.status(500).json({
 //           message:werr.message,
 //         });
@@ -202,7 +250,7 @@ export const getAllProducts = async function (req, res){
 //       flag:'w+'
 //     }, function(werr) {
 //       if(werr){
-//         console.log(werr);
+//         throw(werr);
 //         return res.status(500).json({
 //           message:werr.message,
 //         });

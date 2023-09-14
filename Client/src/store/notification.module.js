@@ -1,24 +1,24 @@
 const initialState = {
-  message:"",
-  type:"" // "success", "error", "default", "info" and "warning"
+  message: "",
+  type: "" // "success", "error", "default", "info" and "warning"
 };
 export const notification = {
   namespaced: true,
   state: initialState,
-  getters:{
-    hasNotification(context){
+  getters: {
+    hasNotification(context) {
       return context.message !== "";
     },
   },
   actions: {
-    createNotification( context, payload ){
+    createNotification(context, payload) {
       Object.assign(context.state, payload);
       return true;
     },
-    getNotification(context){
+    getNotification(context) {
       return context.state;
     },
-    clearNotification () {
+    clearNotification() {
       Object.assign(context.state, initialState);
       return true;
     }

@@ -1,9 +1,9 @@
-import {token} from '../util/token.js'
+import { token } from '../util/token.js'
 import CustomerModel from '../models/customer.model.js';
 import EmployeeModel from '../models/employee.model.js';
 
 export const loginRequired = async (req, res, next) => {
-  if (!req.header('Authorization')) 
+  if (!req.header('Authorization'))
     return res
       .status(401)
       .send({
@@ -13,7 +13,7 @@ export const loginRequired = async (req, res, next) => {
   const tryToken = req.header('Authorization').split(' ')[0];
   token.verifyToken(tryToken, async (err, payload) => {
     if (err) return res.status(401).send({
-      status: false, 
+      status: false,
       message: err
     });
     await CustomerModel.findById(payload.sub)
@@ -26,7 +26,7 @@ export const loginRequired = async (req, res, next) => {
         } else {
           await EmployeeModel.findById(payload.sub)
             .then((result) => {
-              if (result){
+              if (result) {
                 req.user = result;
                 req.user.password = undefined;
                 req.userType = "EMPLOYEE";

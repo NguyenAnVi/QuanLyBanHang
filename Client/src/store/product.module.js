@@ -1,9 +1,9 @@
 import apiService from '../services/api.service';
 const state = {
-  productItems: [] 
+  productItems: []
 }
 const actions = {
-  getProductItems ({ commit }) {
+  getProductItems({ commit }) {
     apiService.getAllProducts().then((response) => {
       commit('UPDATE_PRODUCT_ITEMS', response.data.data)
     });
@@ -15,6 +15,38 @@ const actions = {
         resolve(response.data)
       }).catch((err) => reject(err));
     })
+  },
+  edit({ commit }, payload) {
+    return new Promise((resolve, reject) => {
+      apiService.editProduct(payload.id, payload.product).then((response) => {
+        commit('UPDATE_PRODUCT_ITEMS', response.data)
+        resolve(response.data)
+      }).catch((err) => reject(err));
+    })
+  },
+  getEdit({ }, payload) {
+    return new Promise((resolve, reject) => {
+      apiService.getProductEdit(payload.id).then((response) => {
+        if (response.status)
+          resolve(response.data.product)
+      }).catch((errResponse) => reject(errResponse.error));
+    })
+  },
+  getEditImages({ }, payload) {
+    return new Promise((resolve, reject) => {
+      apiService.getProductEditImages(payload.id).then((response) => {
+        if (response.status)
+          resolve(response.data.images)
+      }).catch((errResponse) => reject(errResponse.error));
+    })
+  },
+  deleteProductImage({ }, payload) {
+    return new Promise((resolve, reject) => {
+      apiService.deleteProductImage(payload.id).then((response) => {
+        if (response.status)
+          resolve(response.data.message)
+      }).catch((errResponse) => reject(errResponse.error));
+    })
   }
 }
 const getters = {
@@ -24,7 +56,7 @@ const getters = {
   }
 }
 const mutations = {
-  UPDATE_PRODUCT_ITEMS (state, payload) {
+  UPDATE_PRODUCT_ITEMS(state, payload) {
     state.productItems = payload;
   }
 }
