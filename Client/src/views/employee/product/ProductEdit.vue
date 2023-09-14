@@ -2,7 +2,6 @@
 import * as yup from "yup";
 import { useStore } from "vuex";
 import { useRoute } from "vue-router";
-import { useToast } from "vue-toastification";
 import { reactive, ref } from "vue";
 import { Form, Field, ErrorMessage } from "vee-validate";
 
@@ -18,8 +17,6 @@ import '@vueup/vue-quill/dist/vue-quill.snow.css';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faCloudArrowUp } from '@fortawesome/free-solid-svg-icons';
 library.add(faCloudArrowUp);
-
-const toast = useToast();
 
 export default {
   components: {
@@ -135,13 +132,8 @@ export default {
         .then((res) => {
           this.isProcessing = false;
 
-          this.$emit('notification', res.message)
+          this.$emit('notification', { message: res.message, type: 'success' })
           this.$router.push({ name: "m.product" });
-          // this.$store.dispatch('notification/createNotification', {
-          //   message: res.message,
-          //   type: "success"
-          // }).then(() => {
-          // });
         })
         .catch((error) => {
           this.isProcessing = false;
@@ -182,7 +174,7 @@ export default {
         .then((res) => {
           this.oldImagesDocArr.splice(index, 1);
           this.oldImageSourcesArr.splice(index, 1);
-          toast("res.message", { type: "success" })
+          this.$emit("notification", { message: res.message, type: "success" })
         })
         .catch((error) => {
           this.message =
@@ -244,15 +236,7 @@ export default {
       }
     }
   },
-  created() {
-    const toast = useToast();
-    console.log(this.$store.getters['notification/hasNotification']);
-    if (this.$store.getters['notification/hasNotification']) {
-      toast(this.$store.state.notification.message, { type: this.$store.state.notification.type });
-    }
-  },
   mounted() {
-    // document.getElementById('uploadImageModal').style.display = 'none';
     if (this.p.roduct.description) {
       this.$refs.quillEditor.pasteHTML(this.p.roduct.description);
     }
@@ -301,7 +285,6 @@ export default {
             <QuillEditor id="quillEditor" ref="quillEditor" theme="snow" :modules="modules" v-model:content="description"
               @textChange="onEditorChangeHandler" />
             <Field type="hidden" ref="description" id="description" name="description" />
-            <!-- <ErrorMessage name="description" /> -->
           </div>
           <div class="cell-wrapper">
             <label for="name">Note</label>
@@ -342,7 +325,8 @@ export default {
         You need to signin to perform this action
       </div>
     </div>
-    <ConfirmDialog @confirmed="deleteOldProductImage" :countdown="1" ref="confirmDialog"></ConfirmDialog>
+    <ConfirmDialog title="Confirm delete image" @confirmed="deleteOldProductImage" :countdown="4" ref="confirmDialog">
+    </ConfirmDialog>
     <UploadImage ref="uploadImageModal" @submitCroppedImage="addNewImage" :aspectRatio="1" id="uploadImageModal" />
   </main>
 </template>
@@ -460,23 +444,6 @@ main {
   }
 }
 
-
-input {
-  width: fit-content;
-}
-
-select {
-  background-color: transparent;
-
-  &>option {
-    padding: 8px;
-    appearance: none;
-    -moz-appearance: none;
-    -webkit-appearance: none;
-    background-color: transparent;
-  }
-}
-
 .button {
   width: 100%;
   padding: 8px 16px;
@@ -487,80 +454,5 @@ select {
 .section-wrapper {
   display: flex;
   flex-direction: column;
-}
-
-.lds-ring {
-  display: inline-block;
-  position: relative;
-  width: 16px;
-  height: 17px;
-
-  &.checked::before {
-    color: #00d519;
-    content: "✔"
-  }
-}
-
-.lds-ring div {
-  box-sizing: border-box;
-  display: block;
-  position: absolute;
-  width: 15px;
-  height: 15px;
-  margin: 0px;
-  border: 3px solid #000000;
-  border-radius: 50%;
-  animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
-  border-color: #000000 transparent transparent transparent;
-}
-
-.lds-ring div:nth-child(1) {
-  animation-delay: -0.45s;
-}
-
-.lds-ring div:nth-child(2) {
-  animation-delay: -0.3s;
-}
-
-.lds-ring div:nth-child(3) {
-  animation-delay: -0.15s;
-}
-
-@keyframes lds-ring {
-  0% {
-    transform: rotate(0deg);
-  }
-
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes bounce {
-
-  0%,
-  20%,
-  50%,
-  80%,
-  100% {
-    transform: translateY(0);
-  }
-
-  40% {
-    transform: translateY(-20px);
-  }
-
-  60% {
-    transform: translateY(-10px);
-  }
-}
-
-[role=alert] {
-  color: red;
-  position: relative;
-
-  &:hover {
-    animation: bounce 1s
-  }
 }
 </style>

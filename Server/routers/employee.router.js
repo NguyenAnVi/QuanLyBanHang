@@ -10,6 +10,7 @@ import {
   get as getProduct,
   add as addProduct,
   edit as editProduct,
+  remove as deleteProduct,
   getImages,
   deleteImage
 } from "../controllers/manage/product.controller.js"
@@ -27,6 +28,7 @@ export default () => {
   router.get("/product/get/:id", loginRequired, isEmployee, getProduct);
   router.get("/product/getimages/:id", loginRequired, isEmployee, getImages);
   router.delete("/product/deleteimage/:id", loginRequired, isEmployee, deleteImage);
+  router.delete("/product/delete/:id", loginRequired, isEmployee, deleteProduct);
   router.get("/product/getall", loginRequired, isEmployee, getAllProducts);
   router.post("/product/add", loginRequired, isEmployee, addProduct);
   router.put("/product/edit", loginRequired, isEmployee, editProduct);

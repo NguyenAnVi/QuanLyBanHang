@@ -85,12 +85,12 @@ export default {
     logOutC() {
       this.$store.dispatch('userC/logout');
       this.$store.state.userC.user = undefined;
-      this.$router.push('/c');
+      this.$router.go('/c');
     },
     logOutE() {
       this.$store.dispatch('userE/logout');
       this.$store.state.userE.user = undefined;
-      this.$router.push('/m');
+      this.$router.go('/m');
     },
     updateAvatar() {
       this.avtSrc = "http://localhost:3001/account.png";
@@ -102,8 +102,11 @@ export default {
         }
       });
     },
-    createNotification(message, type = "default") {
-      toast(message, type)
+    createNotification(payload) {
+      const message = payload.message;
+      const type = payload.type || "default"
+      if (message !== "")
+        toast(message, { type })
     }
   },
   created() {
@@ -224,41 +227,24 @@ export default {
         </div>
       </div>
       <div id="footer">
-        <div>
-          <RouterLink to="/about">About</RouterLink>
-        </div>
-        <div>
-          Policy
-        </div>
-        <div>
-          @nguyenanvi122333
-        </div>
+        <a class="credit" href="https://github.com/NguyenAnVi">
+          <div class="container">
+            <h1><span>@nguyenanvi</span></h1>
+            <div class="blobs_1"></div>
+            <div class="blobs_2"></div>
+            <div class="blobs_3"></div>
+            <div class="blobs_4"></div>
+            <div class="blobs_5"></div>
+            <div class="blobs_6"></div>
+            <div class="blobs_7"></div>
+          </div>
+        </a>
       </div>
     </div>
   </div>
 </template>
 
-<style>
-@import url(@/assets/colortheme.css);
-
-:root {
-  --icon-width: 30px;
-  --header-height: 45px;
-  --footer-height: 50px;
-  --sidebar-icon-width: 48px;
-  --sidebar-width: 200px;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity .5s ease-out;
-}
-
+<style scoped>
 #appWrapper {
   margin: 8px;
   padding: 8px;
@@ -280,7 +266,7 @@ export default {
 
   /* Scale the background image to be as large as possible */
   background-size: cover;
-  background-image: url(@public/background.jpg);
+  background-image: url(@/../public/background.jpg);
   border-radius: 8px;
 }
 
@@ -288,7 +274,6 @@ export default {
 #body,
 #footer {
   box-sizing: border-box;
-  /* box-shadow: inset 0 0 3px var(--color-background-5); */
   border-radius: 8px;
 }
 
@@ -305,7 +290,7 @@ export default {
   height: var(--header-height);
   line-height: 1.5;
 
-  background-color: var(--color-background-1);
+  background-color: #fff;
 
   &>* {
     display: flex;
@@ -373,13 +358,13 @@ export default {
 
     &>* {
       float: right;
-      background-color: var(--color-background-2);
+      background-color: #d1d1d1;
       border-radius: 8px;
       -webkit-border-radius: 8px;
       -moz-border-radius: 8px;
       -ms-border-radius: 8px;
       -o-border-radius: 8px;
-      border: 1px solid var(--color-text-1);
+      border: 1px solid #000;
     }
 
     &>.user-menu {
@@ -488,7 +473,7 @@ export default {
   min-width: var(--sidebar-icon-width);
   width: var(--sidebar-icon-width);
   margin-right: 8px;
-  background-color: #00000077;
+  background-color: #0000003f;
 
   backdrop-filter: blur(10px);
 
@@ -520,7 +505,7 @@ export default {
   border-top: 1px solid var(--color-border);
   padding: 8px;
   padding-top: 16px;
-  background-color: var(--color-background-1);
+  background-color: #fff;
   display: flex;
   grid-column: 3;
   align-items: end;
@@ -571,7 +556,7 @@ nav-sidebar>a {
   &:focus,
   &.router-link-exact-active {
     height: calc(var(--sidebar-icon-width) + 16px);
-    box-shadow: 0 0 5px var(--color-background-5);
+    box-shadow: 0 0 5px #414141;
     background-color: #fff;
   }
 }
@@ -598,7 +583,7 @@ nav-sidebar>a>div {
 
 nav-sidebar>a>svg {
   width: var(--sidebar-icon-width);
-  height: 100%;
+  max-height: 100%;
   align-items: center;
   box-sizing: border-box;
 }
@@ -616,6 +601,175 @@ nav-sidebar>a>svg {
     -moz-border-radius: 0;
     -ms-border-radius: 0;
     -o-border-radius: 0;
+  }
+}
+
+@import url('https://fonts.googleapis.com/css?family=Titan+One');
+
+.credit {
+  display: block;
+  height: 2em;
+  overflow: hidden;
+  padding-block: 2px;
+  box-sizing: border-box;
+}
+
+.container {
+  display: block;
+  position: relative;
+}
+
+.container * {
+  display: block;
+  position: absolute;
+}
+
+.credit>.container {
+  width: 120px;
+  height: 2.1em;
+  line-height: 2.1em;
+  box-sizing: content-box;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%)
+}
+
+h1 {
+  background: #fff;
+  width: 100%;
+  height: inherit;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  font-family: 'Titan One', cursive;
+  font-size: 1.1em;
+  font-weight: 700;
+  flex-flow: row wrap;
+  align-content: center;
+  justify-content: center
+}
+
+h1 span {
+  height: inherit;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+h1 span:before {
+  height: inherit;
+  background: linear-gradient(45deg, #fc5c7d, #6a82fb, #fc5c7d);
+  width: 100%;
+  display: block;
+  position: absolute;
+  content: "";
+  mix-blend-mode: screen;
+}
+
+[class*="blobs"] {
+  mix-blend-mode: color;
+  animation: blobs 15s ease-in-out infinite alternate
+}
+
+.blobs_1 {
+  background: #ff1493;
+  width: 16px;
+  height: 16px;
+  top: 9px;
+  left: 90px
+}
+
+.blobs_2 {
+  background: #ff4500;
+  width: 40px;
+  height: 40px;
+  top: 15px;
+  left: 23px
+}
+
+.blobs_3 {
+  background: #00ff00;
+  width: 20px;
+  height: 20px;
+  top: -7px;
+  left: 20px
+}
+
+.blobs_4 {
+  background: #ff0000;
+  width: 10px;
+  height: 10px;
+  top: 11px;
+  left: 10px
+}
+
+.blobs_5 {
+  background: #ffff00;
+  width: 25px;
+  height: 25px;
+  top: -4px;
+  left: 60px
+}
+
+.blobs_6 {
+  background: #00ffff;
+  width: 20px;
+  height: 20px;
+  top: 12px;
+  left: 55px
+}
+
+.blobs_7 {
+  background: #ff8c00;
+  width: 30px;
+  height: 20px;
+  top: 10px;
+  left: 70px
+}
+
+@keyframes blobs {
+  0% {
+    border-radius: 26% 74% 61% 39% / 54% 67% 33% 46%
+  }
+
+  10% {
+    border-radius: 74% 26% 47% 53% / 68% 46% 54% 32%
+  }
+
+  20% {
+    border-radius: 48% 52% 30% 70% / 27% 37% 63% 73%
+  }
+
+  30% {
+    border-radius: 73% 27% 57% 43% / 28% 67% 33% 72%
+  }
+
+  40% {
+    border-radius: 63% 37% 56% 44% / 25% 28% 72% 75%
+  }
+
+  50% {
+    border-radius: 39% 61% 70% 30% / 61% 29% 71% 39%
+  }
+
+  60% {
+    border-radius: 27% 73% 29% 71% / 73% 51% 49% 27%
+  }
+
+  70% {
+    border-radius: 39% 61% 65% 35% / 74% 65% 35% 26%
+  }
+
+  80% {
+    border-radius: 55% 45% 37% 63% / 38% 30% 70% 62%
+  }
+
+  90% {
+    border-radius: 25% 75% 70% 30% / 39% 50% 50% 61%
+  }
+
+  100% {
+    border-radius: 66% 34% 33% 67% / 65% 73% 27% 35%
   }
 }
 </style>

@@ -11,11 +11,10 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
-      '@public': fileURLToPath(new URL('./', import.meta.url))
     }
   },
-  server:{
-    port:3001,
-    host:"0.0.0.0"
+  server: {
+    port: 3001,
+    host: "0.0.0.0"
   }
 })

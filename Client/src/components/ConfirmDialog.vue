@@ -6,7 +6,8 @@ export default {
       type: Boolean
     },
     id: String,
-    countdown: Number
+    countdown: Number,
+    title: String
   },
   data() {
     return {
@@ -52,17 +53,24 @@ export default {
     <div class="modalOverlay" @click="hide"></div>
     <div class="modal">
       <button class="close" @click="hide" type="button">X</button>
-      <div class="bodal-body">
+      <div class="modal-header" v-if="title">
+        <h3>{{ title }}</h3>
+      </div>
+      <div class="modal-body">
         {{ message }}
       </div>
       <button :disabled="countdown && countdownd > 0" @click="proceed" class="button" type="button">
-        OK bồ {{ countdown ? `(${countdownd})` : "" }}
+        Confirm {{ countdown ? `(${countdownd})` : "" }}
       </button>
     </div>
   </div>
 </template>
 
 <style scoped>
+h3 {
+  margin: 0;
+}
+
 .modalWrapper {
   position: absolute;
   width: 100%;
@@ -70,12 +78,11 @@ export default {
   margin-left: auto;
   margin-right: auto;
   z-index: 65535;
-  background-color: rgba(255, 255, 255, 0.253);
   box-sizing: border-box;
 }
 
-body {
-  background-color: #e2e2e2;
+.modal-body {
+  padding-block: 16px;
 }
 
 .button {
@@ -91,12 +98,15 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.2);
   z-index: 1;
+  box-sizing: content-box;
 }
 
 .close {
+  content: "X";
   position: absolute;
+  padding: 0;
   width: 36px;
   height: 36px;
   top: -18px;
@@ -104,23 +114,26 @@ body {
   background-color: white;
   z-index: 10;
   border-radius: 50%;
-  border: none
+  border: none;
+  text-align: center;
+  font-weight: bolder;
+  box-shadow: 0 0 5px #888;
 }
 
 .modal {
   position: absolute;
   left: 0;
   right: 0;
-  padding-top: 46px;
+  padding-top: 16px;
   padding-bottom: 16px;
   padding-inline: 16px;
   margin-left: auto;
   margin-right: auto;
   border-radius: 16px;
   width: 50%;
-  background-color: rgb(193, 193, 193);
+  background-color: #fff;
   z-index: +20;
-  transform: translateY(40vh);
+  transform: translateY(30vh);
 
   &>* {
     display: block;
@@ -128,10 +141,6 @@ body {
 
   @media only screen and (max-width:768px) {
     width: 100%;
-  }
-
-  .modal-body {
-    display: flex;
   }
 }
 </style>

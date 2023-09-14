@@ -1,4 +1,5 @@
 import mongoose from "../providers/database.js";
+import ProductImageModel from "./productImage.model.js";
 
 const ProductSchema = new mongoose.Schema(
   {
@@ -12,7 +13,7 @@ const ProductSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.Number,
       default: 0
     },
-    quantity:{
+    quantity: {
       type: mongoose.Schema.Types.Number,
       default: 0
     },
@@ -30,6 +31,19 @@ const ProductSchema = new mongoose.Schema(
   },
   { timestamps: true, collection: "Products" }
 );
+
+// ProductSchema.pre('remove', async function (next) {
+//   await ProductImageModel.find({
+//     productId: this.id
+//   })
+//     .then(images => {
+//       Promise.all(images.forEach(image => {
+//         unlinkSync(image.path);
+//         image.remove();
+//       }))
+//         .then(next());
+//     });
+// });
 
 const ProductModel = mongoose.model("Products", ProductSchema);
 export default ProductModel;

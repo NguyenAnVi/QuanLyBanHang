@@ -1,40 +1,39 @@
 <script>
-// import {mapActions} from 'vuex'
 export default {
   name: "ProductListItem",
   props: ["productItem", "header"],
   methods: {
     callEdit($event) {
       this.$emit('edit', $event.currentTarget.getAttribute("data-pid"));
+    },
+    callDelete($event) {
+      this.$emit('delete', $event.currentTarget.getAttribute("data-pid"));
     }
   },
 };
 </script>
 <template>
   <div class="card">
-    <div class="cell" :header="header" data-name>{{ productItem.name }}
-      <!-- <a
-          class="button is-rounded is-pulled-left"
-          @click="addCartItem(productItem)"
-        >
-          <strong>Add to Cart</strong>
-        </a> -->
+    <div class="cell" :header="header" data-name>
+      {{ productItem.name }}
     </div>
-    <div class="cell" :header="header" data-quantity>
+    <div class="cell shrink" :header="header" data-quantity>
       <p>{{ productItem.quantity }}</p>
     </div>
-    <div class="cell" :header="header" data-price>
+    <div class="cell shrink" :header="header" data-price>
       <strong>{{ productItem.price }}</strong>
     </div>
-    <div class="cell" :header="header" data-actions>
+    <div class="cell shrink" :header="header" data-actions>
       <button @click="callEdit" :data-pid="productItem._id" type="button">Edit</button>
-      <button type="button">Delete</button>
+      <button @click="callDelete" :data-pid="productItem._id" type="button">Delete</button>
     </div>
   </div>
 </template>
 <style scoped>
 [header] {
-  font-size: bold;
+  text-align: center;
+  font-size: 1.1em;
+  font-weight: bold !important;
   background-color: black;
   color: white;
 }
@@ -43,35 +42,31 @@ export default {
   width: inherit;
   flex-wrap: nowrap;
   display: table-row;
-
-  &>.cell {
-    padding-inline: 16px;
-    display: table-cell;
-    box-sizing: border-box;
-  }
+  overflow: hidden;
 }
 
-.card:not([header])>.cell:hover {
-  background-color: rgb(146, 146, 146);
+.cell {
+  padding-inline: 16px;
+  display: table-cell;
+  box-sizing: border-box;
+  border-radius: 4px;
+}
+
+.cell:hover {
+  background-color: rgb(189, 189, 189);
+}
+
+[header]:hover {
+  background-color: black !important;
 }
 
 [data-name] {
   width: auto;
 }
 
-[data-quantity] {
-  text-align: center;
-  width: 1%;
-  white-space: nowrap;
-}
 
-[data-price] {
-  text-align: center;
-  width: 1%;
-  white-space: nowrap;
-}
 
-[data-actions] {
+.cell.shrink {
   text-align: center;
   width: 1%;
   white-space: nowrap;

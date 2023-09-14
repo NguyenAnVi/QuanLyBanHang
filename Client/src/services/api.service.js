@@ -8,7 +8,9 @@ class ApiService {
   async getAllProducts() {
     return await axios
       .get(API_URL + '/m/product/getall',
-        { headers: { ...authHeaderE() } }
+        {
+          headers: { ...authHeaderE() },
+        }
       )
       .then(response => {
         return {
@@ -45,6 +47,21 @@ class ApiService {
             id,
             data: product
           },
+          { headers: { ...authHeaderE() } }
+        )
+        .then(response => {
+          const data = response;
+          resolve(data)
+        })
+        .catch(error => {
+          reject(error);
+        });
+    })
+  }
+  async deleteProduct(id) {
+    return new Promise(async (resolve, reject) => {
+      await axios
+        .delete(API_URL + '/m/product/delete/' + id,
           { headers: { ...authHeaderE() } }
         )
         .then(response => {

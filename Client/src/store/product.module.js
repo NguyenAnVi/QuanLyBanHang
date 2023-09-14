@@ -24,6 +24,14 @@ const actions = {
       }).catch((err) => reject(err));
     })
   },
+  delete({ commit }, id) {
+    return new Promise((resolve, reject) => {
+      apiService.deleteProduct(id).then((response) => {
+        commit('UPDATE_PRODUCT_ITEMS', response.data)
+        resolve(response.data)
+      }).catch((err) => reject(err));
+    })
+  },
   getEdit({ }, payload) {
     return new Promise((resolve, reject) => {
       apiService.getProductEdit(payload.id).then((response) => {
@@ -44,7 +52,7 @@ const actions = {
     return new Promise((resolve, reject) => {
       apiService.deleteProductImage(payload.id).then((response) => {
         if (response.status)
-          resolve(response.data.message)
+          resolve(response.data)
       }).catch((errResponse) => reject(errResponse.error));
     })
   }

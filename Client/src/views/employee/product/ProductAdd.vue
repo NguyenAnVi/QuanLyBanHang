@@ -91,11 +91,8 @@ export default {
       this.isProcessing = false;
     },
     openImageUploadModal() {
-      document.getElementById('uploadImageModal').style.display = 'block';
+      this.$refs.uploadImageModal.show();
     },
-    // closeModal() {
-    //   document.getElementById('uploadImageModal').style.display = 'none';
-    // },
     addNewImage(newImgData) {
       let tArr = this.imagesArr;
       tArr.push(newImgData)
@@ -148,9 +145,6 @@ export default {
         imagesInput.dispatchEvent(new Event('change'));
       }
     }
-  },
-  mounted() {
-    document.getElementById('uploadImageModal').style.display = 'none';
   }
 };
 </script>
@@ -193,8 +187,7 @@ export default {
 
             <QuillEditor ref="quillEditor" id="quillEditor" theme="snow" toolbar="full" :modules="modules"
               v-model:content="description" @textChange="onEditorChangeHandler" />
-            <Field type="text" ref="description" id="description" name="description" />
-            <!-- <ErrorMessage name="description" /> -->
+            <Field type="hidden" ref="description" id="description" name="description" />
           </div>
           <div class="cell-wrapper">
             <label for="name">Note</label>
@@ -206,17 +199,16 @@ export default {
           <h3>Upload Images</h3>
           <div class="cell-wrapper">
             <label for="name">Choose Files</label>
-            <button type="button" class="button" @click="openImageUploadModal">Add image</button>
+            <button type="button" class="button block" @click="openImageUploadModal">Add image</button>
             <PreviewImages id="previewImages" :images="imagesArr" @deleteImage="deleteImage" />
             <Field type="hidden" ref="images" id="images" placeholder name="images" />
-            <ErrorMessage name="name" />
           </div>
 
         </div>
 
         <div class="group-wrapper upload">
           <div class="cell-wrapper">
-            <button :disabled="!isFormSubmittable" class="button">
+            <button :disabled="!isFormSubmittable" class="button block">
               <div id="quillLoading" v-if="isProcessing" class="lds-ring">
                 <div></div>
                 <div></div>
@@ -232,7 +224,8 @@ export default {
       <div class="section-wrapper" v-show="!currentUser">
         You need to signin to perform this action
       </div>
-      <UploadImage ref="uploadImageModal" @submitCroppedImage="addNewImage" :aspectRatio="1" id="uploadImageModal" />
+      <UploadImage title="Add new image" ref="uploadImageModal" @submitCroppedImage="addNewImage" :aspectRatio="1"
+        id="uploadImageModal" />
     </div>
   </main>
 </template>
@@ -363,106 +356,8 @@ main {
   box-sizing: border-box;
 }
 
-input {
-  width: fit-content;
-}
-
-select {
-  background-color: transparent;
-
-  &>option {
-    padding: 8px;
-    appearance: none;
-    -moz-appearance: none;
-    -webkit-appearance: none;
-    background-color: transparent;
-  }
-}
-
-.button {
-  width: 100%;
-  padding: 8px 16px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-}
-
 .section-wrapper {
   display: flex;
   flex-direction: column;
-}
-
-.lds-ring {
-  display: inline-block;
-  position: relative;
-  width: 16px;
-  height: 17px;
-
-  &.checked::before {
-    color: #00d519;
-    content: "✔"
-  }
-}
-
-.lds-ring div {
-  box-sizing: border-box;
-  display: block;
-  position: absolute;
-  width: 15px;
-  height: 15px;
-  margin: 0px;
-  border: 3px solid #000000;
-  border-radius: 50%;
-  animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
-  border-color: #000000 transparent transparent transparent;
-}
-
-.lds-ring div:nth-child(1) {
-  animation-delay: -0.45s;
-}
-
-.lds-ring div:nth-child(2) {
-  animation-delay: -0.3s;
-}
-
-.lds-ring div:nth-child(3) {
-  animation-delay: -0.15s;
-}
-
-@keyframes lds-ring {
-  0% {
-    transform: rotate(0deg);
-  }
-
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes bounce {
-
-  0%,
-  20%,
-  50%,
-  80%,
-  100% {
-    transform: translateY(0);
-  }
-
-  40% {
-    transform: translateY(-20px);
-  }
-
-  60% {
-    transform: translateY(-10px);
-  }
-}
-
-[role=alert] {
-  color: red;
-  position: relative;
-
-  &:hover {
-    animation: bounce 1s
-  }
 }
 </style>

@@ -24,10 +24,9 @@ const __dirname = fileURLToPath(import.meta.url);
 db.init();
 
 app.use(cors());
-app.use(bodyParser.json({ limit: '1gb' }));
 app.use(cookieParser());
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(bodyParser.json({ limit: '1gb' }));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'));
 app.use(express.static(path.join(__dirname, 'public')));
 

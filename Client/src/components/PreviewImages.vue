@@ -1,43 +1,60 @@
 <script>
-import { h, render, defineEmits } from "vue";
+import { h, render, reactive, toRefs } from "vue";
+const { min, max } = Math;
 export default {
-  name:"PreviewImages",
-  props:{
-    id:String,
-    images:Array
+  name: "PreviewImages",
+  props: {
+    id: String,
+    images: Array
   },
-  watch:{
-    images : {
-      intermediate:true,
-      deep:true,
+  setup() {
+    const state = reactive({
+      scroller: null,
+      scrollLeft: 0,
+    });
+
+    const onWheel = (e) => {
+      state.scrollLeft = state.scroller
+        ? min(
+          state.scroller.scrollWidth - state.scroller.offsetWidth,
+          max(0, e.deltaY + state.scrollLeft)
+        )
+        : state.scrollLeft;
+    };
+    return { ...toRefs(state), onWheel };
+  },
+  watch: {
+    images: {
+      intermediate: true,
+      deep: true,
       handler: function (oldImages, newImages) {
         this.fetchImages(newImages);
       }
     }
   },
-  methods:{
-    deleteImage($event){
+  methods: {
+    deleteImage($event) {
       const index = $event.target.getAttribute("data-index");
     },
-    fetchImages(images){
+    fetchImages(images) {
       let imagesPreview = document.getElementById(this.$props.id);
       imagesPreview.innerHTML = "";
       images.forEach(function (img, index) {
         const div = document.createElement('div');
         div.className = 'img-item';
         const props = {
-          class:'imageItem',
+          class: 'imageItem',
           'data-index': index,
         }
         const children = [
           h('button', {
-            class:'deleteImageButton',
+            class: 'deleteImageButton',
             type: 'button',
             'data-index': index,
             onClick: this.deleteImage
-          },{},"X"),
+          }, {}, "X"),
           h('img', {
-            class:'imagePreview',
+            class: 'imagePreview',
             'data-index': index,
             src: img,
             alt: img
@@ -46,21 +63,21 @@ export default {
         const imgItem = h('div', props, children);
         imagesPreview.appendChild(div)
         render(imgItem, div)
-      },this);
+      }, this);
     },
-    deleteImage($event){
-      this.$emit("deleteImage",$event.target.getAttribute('data-index'))
+    deleteImage($event) {
+      this.$emit("deleteImage", $event.target.getAttribute('data-index'))
     }
-    
+
   }
 }
 </script>
 
 <template>
-  <div class="imagesPreview" :id="id"></div>
+  <div class="imagesPreview" ref="scroller" :scroll-left.camel="scrollLeft" @wheel.prevent="onWheel" :id="id"></div>
 </template>
 <style>
-.imagesPreview{
+.imagesPreview {
   padding-top: 8px;
   display: flex;
   flex-wrap: nowrap;
@@ -68,30 +85,43 @@ export default {
   align-items: stretch;
   max-height: 100px;
   width: 100%;
+  overflow: hidden;
 }
-.imageItem{
-    display: inline-block;
-    width: 100px;
-    height: 100px;
-    border-radius: 8px;
-    box-sizing: border-box;
-    margin-right:8px;
-    background-color: antiquewhite;
+
+.imageItem {
+  display: inline-block;
+  width: 100px;
+  height: 100px;
+  border-radius: 8px;
+  font-weight: bolder;
+  box-sizing: border-box;
+  margin-right: 8px;
+  background-color: antiquewhite;
 }
-.deleteImageButton{
+
+.deleteImageButton {
+  padding: 0;
   position: relative;
   width: 24px;
   height: 24px;
   right: -76px;
   background-color: rgb(255, 0, 0);
-  color:rgb(255, 255, 255);
+  color: rgb(255, 255, 255);
   z-index: 10;
-  border-radius: 50%;
-  border:none;
+  border-top-right-radius: 8px;
+  border: none;
+  box-shadow: none;
 }
-img.imagePreview{
+
+.deleteImageButton:hover {
+  transform: none;
+  background-color: rgb(255, 0, 0);
+  box-shadow: none;
+}
+
+img.imagePreview {
   display: block;
-    border-radius: 8px;
+  border-radius: 8px;
   width: 100px;
   height: 100px;
   z-index: -1;

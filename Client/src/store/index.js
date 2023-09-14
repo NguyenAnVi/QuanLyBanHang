@@ -3,7 +3,6 @@ import { cart } from "./cart.module.js";
 import { userE } from "./userE.module.js";
 import { userC } from "./userC.module.js";
 import { product } from "./product.module.js";
-import { notification } from "./notification.module.js";
 
 const store = createStore({
   modules: {
@@ -11,7 +10,6 @@ const store = createStore({
     userE,
     userC,
     product,
-    notification
   },
 });
 

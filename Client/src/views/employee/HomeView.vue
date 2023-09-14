@@ -1,18 +1,20 @@
 <script>
+import { toastInjectionKey } from 'vue-toastification';
+
 // import { useToast } from 'vue-toastification';
 
-  
+
 export default {
   computed: {
     loggedIn() {
       return this.$store.state.userE.status.loggedIn;
     },
   },
-  mounted(){
-    if (!this.loggedIn){
+  created() {
+    if (!this.loggedIn) {
       this.$router.push('/m/signin')
     }
-  },
+  }
 }
 </script>
 
@@ -23,13 +25,14 @@ export default {
 </template>
 
 <style scoped>
-main{
+main {
   padding: 8px 16px;
   gap: 8px;
   display: flex;
   flex-direction: column;
 }
-.tags-wrapper{
+
+.tags-wrapper {
   height: 36px;
   display: flex;
   gap: 12px;
@@ -40,17 +43,16 @@ main{
   &::-webkit-scrollbar {
     height: 0;
   }
-  
-  &>*{
+
+  &>* {
     display: flex;
     min-width: fit-content;
     align-items: center;
     justify-content: center;
     padding-inline: 16px;
     padding-block: 4px;
-    background-color: var(--color-background-1);
+    background-color: #fff;
     border-radius: 25px;
   }
 }
-
 </style>
