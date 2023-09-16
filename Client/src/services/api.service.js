@@ -126,7 +126,21 @@ class ApiService {
           error
         }
       });
-
+  }
+  async newProductCount() {
+    return await axios
+      .get(API_URL + '/m/newproductcount', { headers: { ...authHeaderE() } })
+      .then(response => response.data)
+  }
+  async newOrderCount() {
+    return await axios
+      .get(API_URL + '/m/newordercount', { headers: { ...authHeaderE() } })
+      .then(response => response.data)
+  }
+  async newUserCount() {
+    return await axios
+      .get(API_URL + '/m/newusercount', { headers: { ...authHeaderE() } })
+      .then(response => response.data)
   }
 }
 

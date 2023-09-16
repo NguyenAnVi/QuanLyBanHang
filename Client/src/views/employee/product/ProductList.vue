@@ -35,7 +35,7 @@ export default {
           this.isProcessing = false;
 
           this.$emit('notification', { message: res.message, type: 'success' })
-          this.$router.go({ name: "m.product" });
+          this.$router.go(0);
         })
         .catch((error) => {
           this.message =

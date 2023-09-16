@@ -5,6 +5,7 @@ import { RouterLink, RouterView } from "vue-router";
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faBars, faUser, faArrowRightFromBracket, faHouse, faCloudArrowUp, faGear } from '@fortawesome/free-solid-svg-icons';
 import { useToast } from "vue-toastification";
+import SearchBar from "@/components/SearchBar.vue";
 
 const toast = useToast();
 library.add(faBars, faUser, faArrowRightFromBracket, faHouse, faCloudArrowUp, faGear);
@@ -14,7 +15,8 @@ export default {
     NavNavbar: 'nav-navbar',
     NavSidebar: 'nav-sidebar',
     Suspense,
-    Transition
+    Transition,
+    SearchBar
   },
   data() {
     return {
@@ -126,7 +128,7 @@ export default {
             style="color:rgb(0, 141, 96); font-size: larger; font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;">QUANLYBANHANG</span>
         </div>
         <div>
-          <input type="text" name="search" id="search" placeholder="Search ...">
+          <SearchBar></SearchBar>
         </div>
         <nav-navbar>
           <div class="user-menu" v-if="!currentUserC && $route.fullPath[1] === 'c'">

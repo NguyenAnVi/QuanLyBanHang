@@ -14,6 +14,11 @@ import {
   getImages,
   deleteImage
 } from "../controllers/manage/product.controller.js"
+import {
+  newProductCount,
+  newUserCount,
+  newOrderCount
+} from "../controllers/manage/util.controller.js"
 import { loginRequired } from "../middlewares/loginRequired.middleware.js"
 import { isEmployee } from "../middlewares/isEmployee.middleware.js"
 import express from "express"
@@ -32,6 +37,10 @@ export default () => {
   router.get("/product/getall", loginRequired, isEmployee, getAllProducts);
   router.post("/product/add", loginRequired, isEmployee, addProduct);
   router.put("/product/edit", loginRequired, isEmployee, editProduct);
+
+  router.get("/newproductcount", loginRequired, isEmployee, newProductCount);
+  router.get("/newusercount", loginRequired, isEmployee, newUserCount);
+  router.get("/newordercount", loginRequired, isEmployee, newOrderCount);
 
   // router.post("/updateavatar", loginRequired, isEmployee, updateAvatar);
   return router
