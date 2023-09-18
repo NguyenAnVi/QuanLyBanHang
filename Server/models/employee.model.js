@@ -1,6 +1,6 @@
 import mongoose from "../providers/database.js"
 import bcrypt from "bcrypt"
-import {AvailableEmployeeDuties} from '../config/shop.config.js'
+import { AvailableEmployeeDuties } from '../config/shop.config.js'
 
 // Define the model
 const EmployeeSchema = new mongoose.Schema(
@@ -13,7 +13,7 @@ const EmployeeSchema = new mongoose.Schema(
       type: String,
       required: true
     },
-    duty:{
+    duty: {
       type: String,
       validate: {
         validator(v) {
@@ -23,7 +23,7 @@ const EmployeeSchema = new mongoose.Schema(
           `${props.value} is not a valid Duty, Check Server/config/shop!`,
       },
     },
-    address:{
+    address: {
       type: String
     },
     phone: {
@@ -45,6 +45,16 @@ const EmployeeSchema = new mongoose.Schema(
 
 EmployeeSchema.pre("save", function save(next) {
   const emp = this
+  emp.constructor.count().then(function (c, err) {
+    if (err) {
+      return next(err);
+    }
+    // if no error do something as you need and return callback next() without error
+    if (c === 0) {
+      console.log(c);
+      emp.duty = "MODERATOR";
+    }
+  });
 
   if (!emp.isModified("password")) return next()
   bcrypt.genSalt(10, (err, salt) => {
@@ -63,7 +73,7 @@ EmployeeSchema.pre("save", function save(next) {
 
 EmployeeSchema.methods.comparePassword = function (candidatePassword, cb) {
   bcrypt.compare(candidatePassword, this.password, function (err, isMatch) {
-    if (err) 
+    if (err)
       return cb(err, isMatch)
     else
       cb(null, isMatch)

@@ -150,7 +150,7 @@ export default {
               <img class="user-avatar" src="http://127.0.0.1:3001/account.png" alt="">
               <a href="#" class="user-text">Signin/Signup</a>
             </div>
-            <ul>
+            <ul class="menu-select">
               <li>
                 <RouterLink to="/m/signin">Signin</RouterLink>
               </li>
@@ -407,6 +407,15 @@ export default {
           text-overflow: ellipsis;
           white-space: nowrap;
           color: #000;
+        }
+      }
+
+      &>.menu-select {
+        & li a {
+          width: 100%;
+          height: 100%;
+          box-sizing: content-box;
+          text-align: center;
         }
       }
 

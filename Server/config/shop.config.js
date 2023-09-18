@@ -1,7 +1,9 @@
 const AvailableEmployeeDuties = [
-  'NHANVIEN',
-  'TRUONGPHONG',
-  'GIAMDOC'
+  'EMPLOYEE',
+  'LEADER',
+  'MANAGER',
+  'MODERATOR',
+  'ADMIN'
 ]
 const AvailableOrderStatus = [
   'NEW',

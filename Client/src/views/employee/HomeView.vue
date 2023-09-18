@@ -39,7 +39,7 @@ export default {
   },
   created() {
     if (!this.loggedIn) {
-      this.$router.push('/m/signin')
+      this.$router.push({ name: 'm.signin' })
     }
   },
   mounted() {
@@ -80,12 +80,12 @@ export default {
       <div class="shor"> <!-- shortcuts -->
         <h2>Start</h2>
         <div class="links">
-          <router-link to="/m/product">
+          <router-link :to="{ name: 'm.product' }">
             <span>Products</span>
           </router-link>
-          <router-link to="/m/user">
+          <!-- <router-link :to="{ name: 'm.user' }">
             <span>Users</span>
-          </router-link>
+          </router-link> -->
         </div>
       </div>
     </div>
@@ -108,8 +108,14 @@ main {
   flex: 2;
 }
 
+.anal>.info-card :not(span) {
+  font-size: 2em;
+}
+
 .anal>.info-card span {
-  font-size: 3em;
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: 700;
+  font-size: 2em;
 }
 
 .shor,
@@ -130,7 +136,7 @@ main {
 .links>a {
   background-color: transparent;
   display: flex;
-  padding-block: 2px;
+  padding-block: 1rem;
   padding-right: 2px;
   padding-left: 2px;
   transition-property: padding-left, background-color;

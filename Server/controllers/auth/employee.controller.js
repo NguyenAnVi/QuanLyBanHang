@@ -1,5 +1,5 @@
 import { writeFile } from "fs"
-import {token as Token} from '../../util/token.js'
+import { token as Token } from '../../util/token.js'
 import EmployeeModel from '../../models/employee.model.js'
 import Locals from '../../providers/local.js'
 
@@ -11,35 +11,36 @@ export const signin = async (req, res) => {
       .send({ message: 'You must provide phone and password.' })
   }
   else {
-    const {phone, password} = req.body
+    const { phone, password } = req.body
     await EmployeeModel
       .findOne({
         phone
       })
       .then(result => {
         if (result) {
-          result.comparePassword( 
-            password, 
+          result.comparePassword(
+            password,
             (err, isMatch) => {
               if (err || !isMatch) {
-                return res.status(401).json({ 
-                  message: "Wrong password or phone number" })
+                return res.status(401).json({
+                  message: "Wrong password or phone number"
+                })
               }
               const token = Token.generateToken(result)
               result.token = token
               result.save()
-              .then((r)=>{
-                r.password = undefined
-                return res.json({
-                  ...r._doc,
-                  accessToken:token
+                .then((r) => {
+                  r.password = undefined
+                  return res.json({
+                    ...r._doc,
+                    accessToken: token
+                  })
                 })
-              })
             }
           )
         } else {
           return res.status(401).json({
-            message:"unauthorized"
+            message: "unauthorized"
           }).send()
         }
       })
@@ -47,11 +48,11 @@ export const signin = async (req, res) => {
 }
 
 
-const createNewEmployee =  (empl) => {
-  return new Promise( async (resolve, reject) => {
+const createNewEmployee = (empl) => {
+  return new Promise(async (resolve, reject) => {
     await EmployeeModel
       .findOne({
-        $or : [
+        $or: [
           { phone: empl.phone },
           // { email: empl.email }
         ]
@@ -70,7 +71,7 @@ const createNewEmployee =  (empl) => {
                 resolve('Created')
               })
               .catch((err) => {
-                reject("Error while register new account :"+err.message)
+                reject("Error while register new account :" + err.message)
               })
           } // if (result) else
         } // function (result)
@@ -80,13 +81,13 @@ const createNewEmployee =  (empl) => {
 
 export const signup = async function (req, res) {
   let { name, password, address, phone } = req.body
-  if ( !password || !name || !phone ) {
+  if (!password || !name || !phone) {
     return res
       .status(422)
       .json({ message: 'You must provide name, phone and password.' })
       .send()
   }
-  const duty = "NHANVIEN"
+  const duty = "EMPLOYEE"
   await createNewEmployee({
     phone, password, duty, address, name
   })
@@ -94,25 +95,25 @@ export const signup = async function (req, res) {
       console.log(result);
       return res
         .status(200)
-        .json({message:result})
+        .json({ message: result })
         .send()
     })
-    .catch(err=>{
+    .catch(err => {
       return res
         .status(500)
-        .json({message:err})
+        .json({ message: err })
         .send()
     });
-  
+
 }
 export const requestCreateEmployee = async function (req, res) {
   let { name, password, duty, address, phone } = req.body
-  if ( !password || !name || !phone ) {
+  if (!password || !name || !phone) {
     return res
       .status(422)
       .send({ message: 'You must provide name, phone and password.' })
   }
-  if (!duty){
+  if (!duty) {
     return res
       .status(422)
       .send({ message: 'Duty is missing.' })
@@ -124,13 +125,13 @@ export const requestCreateEmployee = async function (req, res) {
       console.log(result);
       return res
         .status(200)
-        .json({message:result})
+        .json({ message: result })
         .send()
     })
-    .catch(err=>{
+    .catch(err => {
       return res
         .status(500)
-        .json({message:err})
+        .json({ message: err })
         .send()
     });
 }
@@ -143,12 +144,12 @@ export const updateProfile = async (req, res) => {
       .send({ message: 'You must provide current password and confirm your new password.' })
   } else {
     var newData = {
-      fullName:name,
+      fullName: name,
       phone,
       email
     }
     await EmployeeModel
-      .findByIdAndUpdate( req.user._id, newData)
+      .findByIdAndUpdate(req.user._id, newData)
       .then(
         (result) => {
           if (result) {
@@ -156,23 +157,23 @@ export const updateProfile = async (req, res) => {
             result.token = token
             result.save()
 
-            if(newpassword){
+            if (newpassword) {
               result.comparePassword(
                 currentpassword,
-                function(err, isMatch){
-                  if(!err && isMatch===true){
+                function (err, isMatch) {
+                  if (!err && isMatch === true) {
                     console.log(newpassword)
                     result.password = newpassword
                     result.save()
                     return res
                       .status(200)
                       .json({
-                        message:"Update profile successfully.",
+                        message: "Update profile successfully.",
                         user: {
                           ...newData,
-                          accessToken:token
+                          accessToken: token
                         },
-                    })
+                      })
                   } else {
                     return res.status(422).json({
                       message: "Can not update profile due to unauthorized"
@@ -184,15 +185,15 @@ export const updateProfile = async (req, res) => {
               return res
                 .status(200)
                 .json({
-                  message:"Update profile successfully.",
+                  message: "Update profile successfully.",
                   user: {
                     ...newData,
-                    accessToken:token
+                    accessToken: token
                   },
-              })
+                })
             }
 
-            
+
           } else {
             return res
               .status(404)
@@ -200,14 +201,14 @@ export const updateProfile = async (req, res) => {
           } // if (result) else
         } // function (result)
       ) // then
-      .catch(err=>{
+      .catch(err => {
         console.log(err)
         return res.status(500).json({
-          message:err.message
+          message: err.message
         })
       })
   }
-  
+
 }
 export const updateAvatar = async (req, res) => {
   setTimeout(() => {
@@ -215,34 +216,34 @@ export const updateAvatar = async (req, res) => {
     const __port = Locals.config().port
     var base64Data = req.body.avatar.replace(/^data:image\/pngbase64,/, "")
     const filepath = './public/storage/avatar/'
-    const filename = 'user_'+req.user._id+'.png'
-    const publicpath = __hostname + ':' + __port + '/storage/avatar/'+filename
-    writeFile(filepath+filename, base64Data, {
-      encoding:'base64',
-      flag:'w+'
-    }, function(werr) {
-      if(werr){
+    const filename = 'user_' + req.user._id + '.png'
+    const publicpath = __hostname + ':' + __port + '/storage/avatar/' + filename
+    writeFile(filepath + filename, base64Data, {
+      encoding: 'base64',
+      flag: 'w+'
+    }, function (werr) {
+      if (werr) {
         console.log(werr)
         return res.status(500).json({
-          message:werr.message,
+          message: werr.message,
         })
       } else {
-        EmployeeModel.findByIdAndUpdate(req.user._id,{
-          avatar:publicpath
+        EmployeeModel.findByIdAndUpdate(req.user._id, {
+          avatar: publicpath
         })
-        .then((result)=>{
-          if(result){
-            return res.status(200).json({
-              message:"Avatar updated!",
-              avatar:publicpath
-            })
-          } else {
-            return res.status(404).json({
-              message:"User not found!"
-            })
-          }
-        })
-        .catch(err=>res.status(500).json({message:err.message}))
+          .then((result) => {
+            if (result) {
+              return res.status(200).json({
+                message: "Avatar updated!",
+                avatar: publicpath
+              })
+            } else {
+              return res.status(404).json({
+                message: "User not found!"
+              })
+            }
+          })
+          .catch(err => res.status(500).json({ message: err.message }))
       }
     })
   }, 5000)

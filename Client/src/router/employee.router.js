@@ -39,4 +39,24 @@ export default [
     title: 'Edit product',
     component: () => import('@/views/employee/product/ProductEdit.vue')
   },
+  {
+    path: '/m/employee',
+    name: 'm.employee',
+    title: 'Employee management',
+    icon: 'house',
+    showInSideBar: 'm',
+    component: () => import('@/views/employee/employee/EmployeeList.vue')
+  },
+  {
+    path: '/m/employee/add',
+    name: 'm.employee.add',
+    title: 'Add new employee',
+    component: () => import('@/views/employee/employee/EmployeeAdd.vue')
+  },
+  {
+    path: '/m/employee/edit/:id',
+    name: 'm.employee.edit',
+    title: 'Edit employee',
+    component: () => import('@/views/employee/employee/EmployeeEdit.vue')
+  },
 ]
