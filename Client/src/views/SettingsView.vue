@@ -1,12 +1,9 @@
 <script>
 import * as yup from "yup";
 import Select from '../components/Select.vue';
-import { useToast } from 'vue-toastification';
 import Switcher from '../components/Switcher.vue';
 import UploadImage from "../components/UploadImage.vue";
 import { Form, Field, ErrorMessage } from "vee-validate";
-
-const toast = useToast();
 
 export default {
   components: {

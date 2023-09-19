@@ -1,5 +1,3 @@
-import Signin from '@/views/customer/authentication/Signin.vue';
-import Signup from '@/views/customer/authentication/Signup.vue';
 export default [
   {
     path: '/c',
@@ -7,18 +5,24 @@ export default [
     title: 'Customer Home',
     icon: 'house',
     showInSideBar: 'c',
-    component: import('@/views/customer/HomeView.vue')
+    component: () => import('@/views/customer/HomeView.vue')
   },
   {
     path: '/c/signin',
     name: 'c.signin',
     title: 'Customer Signin',
-    component: Signin
+    component: () => import('@/views/customer/authentication/Signin.vue')
   },
   {
     path: '/c/signup',
     name: 'c.signup',
     title: 'Customer Signup',
-    component: Signup
+    component: () => import('@/views/customer/authentication/Signup.vue')
+  },
+  {
+    path: '/c/product/:id',
+    name: 'c.product',
+    title: 'Product',
+    component: () => import('@/views/customer/Product.vue')
   },
 ]

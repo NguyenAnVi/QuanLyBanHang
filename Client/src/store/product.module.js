@@ -3,6 +3,24 @@ const state = {
   productItems: []
 }
 const actions = {
+  getRecommendedProducts({ }) {
+    return new Promise((res, rej) => {
+      apiService.getRecommendedProducts()
+        .then((response) => {
+          res(response.data)
+        })
+        .catch(err => rej(err));
+    })
+  },
+  getProduct({ }, id) {
+    return new Promise((res, rej) => {
+      apiService.getProduct(id)
+        .then((response) => {
+          res(response.data)
+        })
+        .catch(err => rej(err));
+    })
+  },
   getProductItems({ commit }) {
     apiService.getAllProducts().then((response) => {
       commit('UPDATE_PRODUCT_ITEMS', response.data.data)

@@ -6,7 +6,7 @@ import { Form, Field, ErrorMessage } from "vee-validate";
 const toast = useToast();
 
 export default {
-  name: "Register",
+  name: "SignupFormForEmployee",
   components: {
     Form,
     Field,

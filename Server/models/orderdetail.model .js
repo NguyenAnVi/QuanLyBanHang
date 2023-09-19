@@ -1,13 +1,13 @@
-import {AvailableOrderStatus} from '../config/shop.config.js'
+import { AvailableOrderStatus } from '../config/shop.config.js'
 import mongoose from "../providers/database.js";
 
 const OrderDetailSchema = new mongoose.Schema(
   {
-    orderId:{
+    orderId: {
       type: String,
       required: true
     },
-    productId:{
+    productId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true
     },
@@ -21,11 +21,11 @@ const OrderDetailSchema = new mongoose.Schema(
     },
   },
   {
-    orderId:{
+    orderId: {
       type: String,
       required: true
     },
-    productId:{
+    productId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true
     },

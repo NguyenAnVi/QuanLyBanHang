@@ -3,11 +3,10 @@ import * as yup from "yup";
 import { useToast } from 'vue-toastification';
 import { Form, Field, ErrorMessage } from "vee-validate";
 
-const toast = useToast(); 
+const toast = useToast();
 
 export default {
-  
-  name: "Login",
+  name: "SigninFormForCustomer",
   components: {
     Form,
     Field,
@@ -33,9 +32,9 @@ export default {
   created() {
     if (this.loggedIn) {
       this.$store.dispatch('notification/createNotification', {
-        message:"Already signed in",
-        type:"success"
-      }).then(()=>{
+        message: "Already signed in",
+        type: "success"
+      }).then(() => {
         this.$emit('updateAvatar');
         this.$router.push("/")
       });
@@ -58,7 +57,7 @@ export default {
               error.response.data.message) ||
             error.message ||
             error.toString();
-          toast(error.response?.data.message || error.message, { type:"error" });
+          toast(error.response?.data.message || error.message, { type: "error" });
         }
       );
     },
@@ -72,20 +71,25 @@ export default {
     <Form @submit="handleLogin" :validation-schema="schema">
       <div class="form-group">
         <label for="email">Phone</label>
-        <Field name="phone" type="tel" class="form-control" placeholder="phone"/>
+        <Field name="phone" type="tel" class="form-control" placeholder="phone" />
         <ErrorMessage name="phone" class="error-feedback" />
       </div>
       <div class="form-group">
         <label for="password">Password</label>
-        <Field name="password" type="password" class="form-control" placeholder="password"/>
+        <Field name="password" type="password" class="form-control" placeholder="password" />
         <ErrorMessage name="password" class="error-feedback" />
       </div>
 
       <div class="form-group">
         <button class="button-52" :disabled="loading">
-          <span
-            v-show="loading"
-          ><div class="lds-ring"><div></div><div></div><div></div><div></div></div></span>
+          <span v-show="loading">
+            <div class="lds-ring">
+              <div></div>
+              <div></div>
+              <div></div>
+              <div></div>
+            </div>
+          </span>
           <span>Login</span>
         </button>
       </div>
@@ -100,7 +104,7 @@ export default {
 </template>
 
 <style scoped>
-#form-wrapper{
+#form-wrapper {
   background-color: #00000000;
   width: 100%;
   height: 100%;
@@ -109,42 +113,55 @@ export default {
   align-items: center;
   justify-content: center;
 
-  @media only screen and (max-width: 720px){
-    &{
+  @media only screen and (max-width: 720px) {
+    & {
       flex-direction: column;
     }
   }
 }
-.title{
+
+Form {
+  padding: 2rem;
+  box-sizing: border-box;
+  background-color: beige;
+  border-radius: 16px;
+}
+
+.title {
   width: 100px;
   margin-block: 30px;
   font-size: 32px;
   font-weight: bolder;
 }
-.form-group{
+
+.form-group {
   width: 300px;
   margin: 6px 0;
   padding: 8px;
   background-color: var(--color-background-1);
   display: flex;
   flex-direction: column;
-  border-radius: 8px ;
-  -webkit-border-radius: 8px ;
-  -moz-border-radius: 8px ;
-  -ms-border-radius: 8px ;
-  -o-border-radius: 8px ;
-  &>label{
-    font-weight:bold;
+  border-radius: 8px;
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  -ms-border-radius: 8px;
+  -o-border-radius: 8px;
+
+  &>label {
+    font-weight: bold;
   }
-  &>span[role=alert]{
+
+  &>span[role=alert] {
     color: red;
   }
-  &.form-message:empty{
+
+  &.form-message:empty {
     margin: 0;
     padding: 0;
   }
 }
-.form-group > input{
+
+.form-group>input {
   width: 100%;
   background-color: transparent;
   transition: (transform, padding) .5s ease-in-out;
@@ -168,7 +185,8 @@ export default {
   -ms-border-radius: 0;
   -o-border-radius: 0;
 }
-.form-group > input::placeholder{
+
+.form-group>input::placeholder {
   content: "...";
   color: rgba(87, 87, 86, 0.8);
 }
@@ -186,11 +204,19 @@ export default {
   user-select: none;
   -webkit-user-select: none;
   touch-action: manipulation;
+
+  z-index: 1;
+
+  box-shadow: inset 0 0 4px #888;
+
+  color: white;
+  text-shadow: 0 0 5px #7b7b7b;
+  font-weight: 700;
 }
 
 .button-52:after {
   content: "";
-  background-color: #ffe54c;
+  background-color: rgb(0, 141, 96);
   width: 100%;
   z-index: -1;
   position: absolute;
@@ -204,48 +230,6 @@ export default {
   top: 0px;
   left: 0px;
 }
-
-.lds-ring {
-  display: inline-block;
-  position: relative;
-  width: 16px;
-  height: 16px;
-  margin-inline: 4px;
-}
-.lds-ring div {
-  box-sizing: border-box;
-  display: block;
-  position: absolute;
-  width: 16px;
-  height: 16px;
-  margin: 0px;
-  border: 3px solid #000000;
-  border-radius:50%;
-  -webkit-border-radius:50%;
-  -moz-border-radius:50%;
-  -ms-border-radius:50%;
-  -o-border-radius:50%;
-  animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
-  border-color: #000000 transparent transparent transparent;
-}
-.lds-ring div:nth-child(1) {
-  animation-delay: -0.45s;
-}
-.lds-ring div:nth-child(2) {
-  animation-delay: -0.3s;
-}
-.lds-ring div:nth-child(3) {
-  animation-delay: -0.15s;
-}
-@keyframes lds-ring {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
 
 @media (min-width: 768px) {
   .button-52 {

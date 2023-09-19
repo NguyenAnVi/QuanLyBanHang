@@ -109,6 +109,9 @@ export default {
       const type = payload.type || "default"
       if (message !== "")
         toast(message, { type })
+    },
+    search(value) {
+      this.$refs.search.search(value)
     }
   },
   created() {
@@ -128,7 +131,7 @@ export default {
             style="color:rgb(0, 141, 96); font-size: larger; font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;">QUANLYBANHANG</span>
         </div>
         <div>
-          <SearchBar></SearchBar>
+          <SearchBar ref="search"></SearchBar>
         </div>
         <nav-navbar>
           <div class="user-menu" v-if="!currentUserC && $route.fullPath[1] === 'c'">
@@ -196,14 +199,14 @@ export default {
               <img class="user-avatar" src="http://127.0.0.1:3001/cart.png" alt="">
               <a href="#" class="user-text">Cart: {{ cartQuantity }}</a>
             </div>
-            <ul>
+            <!-- <ul>
               <li>
                 <RouterLink to="/c/signin">Signin</RouterLink>
               </li>
               <li>
                 <RouterLink to="/c/signup">Signup</RouterLink>
               </li>
-            </ul>
+            </ul> -->
           </div>
         </nav-navbar>
       </div>
@@ -220,7 +223,8 @@ export default {
         </div>
         <div id="content">
           <Suspense>
-            <RouterView @updateAvatar="updateAvatar" @notification="createNotification" v-slot="{ Component }">
+            <RouterView @updateAvatar="updateAvatar" @notification="createNotification" @search="search"
+              v-slot="{ Component }">
               <Transition name="fade" mode="out-in">
                 <component :is="Component" />
               </Transition>

@@ -23,6 +23,26 @@ class ApiService {
         }
       });
   }
+  async getRecommendedProducts() {
+    return await axios
+      .get(API_URL + '/c/product/getrecommended')
+      .then(response => {
+        return {
+          data: response.data
+        };
+      })
+      .catch(err => err);
+  }
+  async getProduct(id) {
+    return await axios
+      .get(API_URL + '/c/product/getdetail/' + id)
+      .then(response => {
+        return {
+          data: response.data
+        };
+      })
+      .catch(err => err);
+  }
   async addProduct(product) {
     return new Promise(async (resolve, reject) => {
       await axios
