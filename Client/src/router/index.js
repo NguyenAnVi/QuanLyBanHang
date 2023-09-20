@@ -16,7 +16,6 @@ export const routes = [
     component: NotFound
   }
 ]
-console.log(routes);
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes

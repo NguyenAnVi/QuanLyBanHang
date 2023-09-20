@@ -35,6 +35,8 @@ body,
   --footer-height: 3em;
   --sidebar-icon-width: 48px;
   --sidebar-width: 200px;
+
+  --primary-color: rgb(0, 141, 96);
 }
 
 .fade-enter-from,
@@ -75,6 +77,13 @@ button:hover {
 button:active {
   background-color: #ddd;
   transform: scale(0.99);
+}
+
+button:disabled {
+  background: linear-gradient(to right, #ffffff99, #ffffff99);
+  box-shadow: none;
+  cursor: no-drop;
+  transform: none;
 }
 
 button.block {

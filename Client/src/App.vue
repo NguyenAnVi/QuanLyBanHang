@@ -6,6 +6,7 @@ import { library } from '@fortawesome/fontawesome-svg-core';
 import { faBars, faUser, faArrowRightFromBracket, faHouse, faCloudArrowUp, faGear } from '@fortawesome/free-solid-svg-icons';
 import { useToast } from "vue-toastification";
 import SearchBar from "@/components/SearchBar.vue";
+import Cart from "./components/Cart.vue";
 
 const toast = useToast();
 library.add(faBars, faUser, faArrowRightFromBracket, faHouse, faCloudArrowUp, faGear);
@@ -16,7 +17,8 @@ export default {
     NavSidebar: 'nav-sidebar',
     Suspense,
     Transition,
-    SearchBar
+    SearchBar,
+    Cart
   },
   data() {
     return {
@@ -51,9 +53,6 @@ export default {
     this.updateAvatar();
   },
   computed: {
-    cartQuantity() {
-      return this.$store.getters["cart/cartQuantity"]
-    },
     currentUserC() {
       return this.$store.state.userC.user;
     },
@@ -112,10 +111,12 @@ export default {
     },
     search(value) {
       this.$refs.search.search(value)
-    }
+    },
+    updateCart() {
+      this.$refs.cart.update();
+    },
   },
   created() {
-    this.$store.dispatch("cart/getCartItems");
   }
 }
 </script>
@@ -128,18 +129,19 @@ export default {
           <font-awesome-icon id="sidebar-toggler" :icon="['fas', 'bars']" size="lg" />
           <img id="logo" alt="logo" class="logo" src="@/assets/logo.svg" />
           <span
-            style="color:rgb(0, 141, 96); font-size: larger; font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;">QUANLYBANHANG</span>
+            style="color:var(--primary-color); font-size: larger; font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;">QUANLYBANHANG</span>
         </div>
         <div>
           <SearchBar ref="search"></SearchBar>
         </div>
         <nav-navbar>
+          <Cart ref="cart" v-if="$route.fullPath[1] === 'c'" />
           <div class="user-menu" v-if="!currentUserC && $route.fullPath[1] === 'c'">
             <div class="menu-label">
               <img class="user-avatar" src="http://127.0.0.1:3001/account.png" alt="">
               <a href="#" class="user-text">Signin/Signup</a>
             </div>
-            <ul>
+            <ul class="menu-select">
               <li>
                 <RouterLink to="/c/signin">Signin</RouterLink>
               </li>
@@ -167,7 +169,7 @@ export default {
               <img ref="useravatar" class="user-avatar" :src="avtSrc" alt="">
               <a href="#" class="user-text">{{ currentUserE.name }}</a>
             </div>
-            <ul>
+            <ul class="menu-select">
               <li>
                 <RouterLink to="/settings">
                   <div>Settings</div>
@@ -183,7 +185,7 @@ export default {
               <img ref="useravatar" class="user-avatar" :src="avtSrc" alt="">
               <a href="#" class="user-text">{{ currentUserC.name }}</a>
             </div>
-            <ul>
+            <ul class="menu-select">
               <li>
                 <RouterLink to="/settings">
                   <div>Settings</div>
@@ -193,20 +195,6 @@ export default {
                 Sign Out
               </li>
             </ul>
-          </div>
-          <div class="user-menu" v-if="$route.fullPath[1] === 'c'">
-            <div class="menu-label">
-              <img class="user-avatar" src="http://127.0.0.1:3001/cart.png" alt="">
-              <a href="#" class="user-text">Cart: {{ cartQuantity }}</a>
-            </div>
-            <!-- <ul>
-              <li>
-                <RouterLink to="/c/signin">Signin</RouterLink>
-              </li>
-              <li>
-                <RouterLink to="/c/signup">Signup</RouterLink>
-              </li>
-            </ul> -->
           </div>
         </nav-navbar>
       </div>
@@ -224,7 +212,7 @@ export default {
         <div id="content">
           <Suspense>
             <RouterView @updateAvatar="updateAvatar" @notification="createNotification" @search="search"
-              v-slot="{ Component }">
+              @updateCart="updateCart" v-slot="{ Component }">
               <Transition name="fade" mode="out-in">
                 <component :is="Component" />
               </Transition>
@@ -359,39 +347,34 @@ export default {
   }
 
   &>nav-navbar {
-    justify-content: end;
-    display: block;
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
 
     &>* {
-      float: right;
-      background-color: #d1d1d1;
-      border-radius: 8px;
-      -webkit-border-radius: 8px;
-      -moz-border-radius: 8px;
-      -ms-border-radius: 8px;
-      -o-border-radius: 8px;
-      border: 1px solid #000;
+      border-radius: 18px;
     }
 
     &>.user-menu {
-      width: 140px;
+      max-width: 140px;
       height: 32px;
-      display: block;
-      overflow: hidden;
-      border-radius: 16px;
+      display: inline-block;
+      overflow: visible;
 
       &>* {
         z-index: 10;
-        width: inherit;
-        height: inherit;
       }
 
       &>.menu-label {
+        width: fit-content !important;
         height: inherit;
         display: flex;
         justify-content: space-between;
         align-items: center;
+        border-radius: 16px;
         background-color: #fff;
+        box-shadow: rgba(0, 0, 0, 0.21) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
+
 
         &>.user-avatar {
           border-radius: 50%;
@@ -414,28 +397,22 @@ export default {
         }
       }
 
-      &>.menu-select {
-        & li a {
-          width: 100%;
-          height: 100%;
-          box-sizing: content-box;
-          text-align: center;
-        }
-      }
 
       &>ul {
+        min-width: 150px;
+        border-radius: 16px;
         height: auto;
-        padding: 0;
         margin: 0;
+        padding: 0;
+        /* display: flex;
+        flex-direction: column; */
         display: none;
         list-style: none;
-        border-radius: 8px;
-        border: 1px solid black;
         position: absolute;
-        background-color: #080;
-        transition-property: transform;
-        transition-duration: .2s;
-        transition-timing-function: ease-in-out;
+        right: 16px;
+        box-shadow: rgba(0, 0, 0, 0.21) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
+        background-color: #ffffff;
+        overflow: hidden;
 
         &>li {
           padding: 4px 8px;
@@ -443,18 +420,13 @@ export default {
           align-items: center;
           justify-content: center;
           cursor: pointer;
-          background-color: #ffffff;
-          color: #000;
+        }
 
-          &:first-child {
-            border-top-left-radius: 8px;
-            border-top-right-radius: 8px;
-          }
-
-          &:last-child {
-            border-bottom-left-radius: 8px;
-            border-bottom-right-radius: 8px;
-          }
+        & li a {
+          width: 100%;
+          height: 100%;
+          box-sizing: content-box;
+          text-align: center;
         }
       }
 
@@ -464,8 +436,7 @@ export default {
           flex-direction: column;
 
           &>li:hover {
-            color: #fff;
-            background-color: #000000;
+            background-color: #bababa;
           }
         }
       }
@@ -785,6 +756,12 @@ h1 span:before {
 
   100% {
     border-radius: 66% 34% 33% 67% / 65% 73% 27% 35%
+  }
+}
+
+@media screen and (max-width:768px) {
+  .user-text {
+    display: none;
   }
 }
 </style>

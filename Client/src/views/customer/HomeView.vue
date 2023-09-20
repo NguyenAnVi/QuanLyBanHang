@@ -71,7 +71,7 @@ export default {
           <div class="product-item-text">
             <h4>{{ product.name }}</h4>
             <span class="price">{{ toPrice(product.price) }}</span>
-            <span>Stock: {{ product.stock }}</span>
+            <span>Stock: {{ product.quantity }}</span>
           </div>
         </div>
 

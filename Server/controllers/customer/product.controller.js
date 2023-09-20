@@ -4,7 +4,10 @@ import ProductImageModel from "../../models/productImage.model.js";
 export const getRecommendedProducts = async function (req, res) {
   try {
     const products = await ProductModel.find({
-      deletedAt: { $exists: false }
+      $and: [
+        { deletedAt: { $exists: false }, },
+        // { quantity: { $gt: 0 } }
+      ]
     }).limit(16);
 
     var images = {};

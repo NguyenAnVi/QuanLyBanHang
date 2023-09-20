@@ -216,7 +216,7 @@ Form {
 
 .button-52:after {
   content: "";
-  background-color: rgb(0, 141, 96);
+  background-color: var(--primary-color);
   width: 100%;
   z-index: -1;
   position: absolute;

@@ -2,13 +2,15 @@
 import Pills from '@/components/pills.vue';
 import Gallery from '@/components/Gallery.vue';
 import { RouterLink } from 'vue-router';
+import InputTypeNumber from '@/components/InputTypeNumber.vue';
 
 export default {
   name: "ProductDetailCustomer",
   components: {
     Pills,
     RouterLink,
-    Gallery
+    Gallery,
+    InputTypeNumber
   },
   data() {
     return {
@@ -17,6 +19,7 @@ export default {
         "plants", "vegetables", "fruits", "dairy", "meat", "fish", "dresses", "speaker", "shoes", "bags", "shoes", "pant", "shirt", "shoes", "bags", "shoes", "pant", "others"
       ],
       product: [],
+      quantity: 0,
       productImages: [],
       recommendedProducts: [],
       recommendedProductImages: [],
@@ -25,6 +28,7 @@ export default {
   },
   methods: {
     async fetchProduct(id) {
+      this.$refs.inputQuantity.reset();
       try {
         this.$store.dispatch('product/getProduct', id)
           .then((data) => {
@@ -35,7 +39,6 @@ export default {
             this.$emit('notification', { message: err.message, type: 'error' });
           })
       } catch (err) {
-        console.log(err);
         err.message = "Dispatching ('product/getProduct'): " + err.message
         this.$emit('notification', { message: err.message, type: 'error' });
       }
@@ -50,6 +53,21 @@ export default {
     },
     toPrice(value = "") {
       return value.toLocaleString('vi', { style: 'currency', currency: 'VND' });
+    },
+    quantityValueChanged(val) {
+      this.quantity = val;
+    },
+    addToCart() {
+      const item = {
+        productId: this.product._id,
+        productName: this.product.name,
+        quantity: this.quantity,
+        maxQuantity: this.product.quantity,
+        orderPrice: this.product.price
+      }
+      this.$store.dispatch('cart/addCartItem', item)
+      this.$emit('updateCart')
+      this.$emit('notification', { message: "Added to cart!", type: "success" })
     }
   },
   watch: {
@@ -71,6 +89,8 @@ export default {
       err.message = "Dispatching ('product/getRecommendedProduct'): " + err.message
       this.$emit('notification', { message: err.message, type: 'error' });
     }
+  },
+  mounted() {
     this.id = this.$route.params.id;
   }
 }
@@ -79,44 +99,69 @@ export default {
 <template>
   <main>
     <div class="product-detail">
-      <div>
+      <div class="section">
         <div class="product-images">
           <Gallery :images="productImages" />
         </div>
         <div class="product-text">
           <h3 style="display: block; width: 100%;">{{ product.name }}</h3>
-          <span>Stock: {{ product.stock }}</span>
-          <span class="price">{{ toPrice(product.price) }}</span>
-          <button class="btn primary">Add to cart</button>
-          <button class="btn secondary">Buy now</button>
-        </div>
-      </div>
-      <div class="product-description">
-        <h4>Description</h4>
-        <ul>
-          <li>Stock: {{ product.quantity }}</li>
-        </ul>
-        <div class="html" v-html="product.description" />
-      </div>
-    </div>
-    <div class="recommended-products">
-      <Pills :pills="tags" @clickPill="clickPill" />
-      <div class="products-list">
-        <div class="product-item" v-for="p in recommendedProducts" @click="clickProduct" :data-pid="p._id">
-          <div class="product-item-img">
-            <img
-              :src="recommendedProductImages[p._id].length > 0 ? recommendedProductImages[p._id][0].publicPath : origin + '/noimage.png'"
-              alt="">
-          </div>
-          <div class="product-item-text">
-            <h4>{{ p.name }}</h4>
-            <span class="price">{{ toPrice(p.price) }}</span>
+          <h2 class="price">{{ toPrice(product.price) }}</h2>
+          <span>Stock: {{ product.quantity > 0 ? product.quantity : "Out of stock" }}</span>
+          <table class="tbl">
+            <tr>
+              <td>Shipping: &nbsp;&nbsp;&nbsp;&nbsp;</td>
+              <td><img style="border-radius: 0;height:1em; aspect-ratio: 1; transform: scale(2); margin-inline: 1em;"
+                  :src="origin + '/freeshipping.png'" alt="" srcset=""> Free
+                shipping</td>
+            </tr>
+            <tr>
+              <td>Quantity: &nbsp;&nbsp;&nbsp;&nbsp;</td>
+              <td>
+                <InputTypeNumber :disabled="product.quantity <= 0" ref="inputQuantity" :max="product.quantity"
+                  :min="(Math.min(1, product.quantity) || 0)" @change.self="quantityValueChanged" />
+              </td>
+            </tr>
+          </table>
+          <button :disabled="product.quantity <= 0" class="btn primary" @click="addToCart">Add to cart</button>
+          <button :disabled="product.quantity <= 0" class="btn secondary">Buy now</button>
+          <div style="padding-top: 2em;border-top: 1px solid #ddd;margin-block: 1em;">
+            <img style="height:16px; aspect-ratio: 1; transform: scale(2); margin-inline: 1em;"
+              :src="origin + '/guarantee.png'" alt="">
+            <span style="font-weight: 700;">Guarantee</span>
+            &nbsp;
+            <span style="color: #888;">Get the items you ordered or get your money back</span>
 
           </div>
         </div>
       </div>
+      <div class="section">
+        <div class="product-description">
+          <h4>Description</h4>
+          <ul>
+            <li>Stock: {{ product.quantity }}</li>
+          </ul>
+          <div class="html" v-html="product.description" />
+        </div>
+        <div class="recommended-products">
+          <Pills :pills="tags" @clickPill="clickPill" />
+          <div class="products-list">
+            <div class="product-item" v-for="p in recommendedProducts" @click="clickProduct" :data-pid="p._id">
+              <div class="product-item-img">
+                <img
+                  :src="recommendedProductImages[p._id].length > 0 ? recommendedProductImages[p._id][0].publicPath : origin + '/noimage.png'"
+                  alt="">
+              </div>
+              <div class="product-item-text">
+                <h3>{{ p.name }}</h3>
+                <h4 class="price">{{ toPrice(p.price) }}</h4>
+              </div>
+            </div>
+          </div>
 
+        </div>
+      </div>
     </div>
+
   </main>
 </template>
 
@@ -130,7 +175,7 @@ img {
 main {
   display: flex;
   flex-wrap: nowrap;
-  flex-direction: row;
+  flex-direction: column;
   justify-content: stretch;
   align-items: stretch;
 }
@@ -146,13 +191,6 @@ main>* {
   border-radius: 8px;
   flex: 1 0 auto;
 
-}
-
-.recommended-products {
-  width: 300px;
-  overflow: hidden;
-  padding: 8px;
-  margin: 8px;
 }
 
 .products-list {
@@ -171,8 +209,8 @@ main>* {
 }
 
 .price {
+  margin-block: 0.5rem;
   font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-  font-size: 1.2em;
   color: red;
 }
 
@@ -197,10 +235,19 @@ main>* {
   box-sizing: border-box;
 }
 
-
+.product-detail>*:nth-child(2) {
+  display: flex;
+  flex-wrap: nowrap;
+  flex-direction: row;
+  gap: 8px;
+  align-content: flex-start;
+  margin-bottom: 8px;
+  box-sizing: border-box;
+  background-color: transparent;
+}
 
 .product-images {
-  width: 300px;
+  width: 500px;
   margin-left: auto;
   margin-right: auto;
 }
@@ -219,14 +266,30 @@ main>* {
   display: inline-block;
 }
 
+table {
+  margin-block: 8px;
+  width: auto;
+
+  & * {
+    color: #888;
+  }
+
+  & tr {
+    margin-block: 8px;
+  }
+
+  & td {
+    display: inline-block;
+  }
+}
+
 .btn.primary {
-  background-color: rgb(0, 141, 96);
+  background-color: var(--primary-color);
   color: white;
   font-size: 1.5em;
 }
 
 .product-description {
-  display: block;
   width: 100%;
   border-radius: 8px;
   background-color: #ffffffaa;
@@ -246,6 +309,10 @@ main>* {
   }
 }
 
+.recommended-products {
+  width: 500px;
+}
+
 .products-list {
   display: flex;
   flex-wrap: wrap;
@@ -259,7 +326,7 @@ main>* {
   cursor: pointer;
   display: flex;
   width: 100%;
-  height: 4rem;
+  height: 8rem;
 
   gap: 8px;
   border-radius: 8px;
@@ -300,16 +367,12 @@ main>* {
     flex-wrap: wrap;
   }
 
-  /* .product-images {
-    width: 100% !important;
-  } */
-
-  main {
-    flex-direction: column;
+  .recommended-products {
+    width: 100%;
   }
 
-  .recommended-products {
-    padding: 16px;
+  .product-detail>*:nth-child(2) {
+    flex-direction: column;
   }
 }
 </style>

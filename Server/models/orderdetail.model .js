@@ -11,24 +11,6 @@ const OrderDetailSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       required: true
     },
-    orderPrice: {
-      type: mongoose.Schema.Types.Number,
-      default: 0
-    },
-    discount: {
-      type: mongoose.Schema.Types.Number,
-      default: 0
-    },
-  },
-  {
-    orderId: {
-      type: String,
-      required: true
-    },
-    productId: {
-      type: mongoose.Schema.Types.ObjectId,
-      required: true
-    },
     quantity: {
       type: mongoose.Schema.Types.Number,
       default: 0

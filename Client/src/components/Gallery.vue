@@ -29,7 +29,7 @@ export default {
   data() {
     const origin = location.origin;
     const currentImageIndex = -1;
-    console.log(this.$props.images);
+    // console.log(this.$props.images);
     return {
       monitor: this.$props.images.length > 0 ? this.$props.images[currentImageIndex].publicPath : (origin + "noimage.png"),
       currentImageIndex,
@@ -39,15 +39,15 @@ export default {
   },
   methods: {
     show(index) {
-      console.log("showing: ", index);
+      // console.log("showing: ", index);
       this.currentImageIndex = index;
       if (this.validArray) {
-        console.log(this.$props.images[index].publicPath);
+        // console.log(this.$props.images[index].publicPath);
         this.monitor = this.$props.images[index].publicPath;
       } else { this.showAlternative(); }
     },
     showAlternative() {
-      console.log("showingAlternative");
+      // console.log("showingAlternative");
       this.monitor = this.origin + "/noimage.png"
     }
   },
@@ -58,7 +58,7 @@ export default {
   },
   watch: {
     images(newV, oldV) {
-      console.log("images changed");
+      // console.log("images changed");
       this.show(0)
     }
   }
