@@ -23,7 +23,9 @@ export default {
   data() {
     return {
       routerRoutes,
-      avtSrc: "http://localhost:3001/account.png",
+      userCAvatar: "",
+      userEAvatar: "",
+      cartTimestamp: Date.now()
     }
   },
   watch: {
@@ -32,7 +34,7 @@ export default {
       document.title = title;
     }
   },
-  mounted: function () {
+  mounted() {
     const sidebar = document.getElementById("sidebar");
     const openSideBar = (sb) => {
       sb.classList.add("opened");
@@ -50,7 +52,7 @@ export default {
     logo.addEventListener('click', () => {
       toggleSideBar(sidebar);
     });
-    this.updateAvatar();
+    this.updateAuthentication();
   },
   computed: {
     currentUserC() {
@@ -59,32 +61,11 @@ export default {
     currentUserE() {
       return this.$store.state.userE.user;
     },
-    showAdminBoard() {
-      if (this.currentUser && this.currentUser['roles']) {
-        return this.currentUser['roles'].includes('ROLE_ADMIN');
-      }
 
-      return false;
-    },
-    showModeratorBoard() {
-      if (this.currentUser && this.currentUser['roles']) {
-        return this.currentUser['roles'].includes('ROLE_MODERATOR');
-      }
-
-      return false;
-    }
   },
   methods: {
-    isValidImage(url) {
-      return new Promise((resolve, reject) => {
-        let image = new Image();
-        image.onload = () => resolve(true);
-        image.onerror = () => resolve(false);
-        image.src = url;
-      });
-    },
-    logOutC() {
-      this.$store.dispatch('userC/logout');
+    async logOutC() {
+      await this.$store.dispatch('userC/logout');
       this.$store.state.userC.user = undefined;
       this.$router.go('/c');
     },
@@ -93,15 +74,16 @@ export default {
       this.$store.state.userE.user = undefined;
       this.$router.go('/m');
     },
-    updateAvatar() {
-      this.avtSrc = "http://localhost:3001/account.png";
-      const newAvtSrc = JSON.parse(localStorage.getItem('user'))?.avatar || this.avtSrc;
-      this.isValidImage(newAvtSrc).then(isValid => {
-        if (isValid) {
-          // The image is valid
-          this.avtSrc = newAvtSrc + "?timestamp=" + Date.now();
-        }
-      });
+    updateAuthentication() {
+      const defaultAvtSrc = "http://localhost:3001/account.png";
+      const newUserCAvatar = JSON.parse(localStorage.getItem('userC'))?.avatar || defaultAvtSrc;
+      const newUserEAvatar = JSON.parse(localStorage.getItem('userE'))?.avatar || defaultAvtSrc;
+      this.userCAvatar = newUserCAvatar + "?t=" + Date.now();
+      this.userEAvatar = newUserEAvatar + "?t=" + Date.now();
+
+      // update Cart:
+      this.cartTimestamp = Date.now();
+
     },
     createNotification(payload) {
       const message = payload.message;
@@ -115,8 +97,6 @@ export default {
     updateCart() {
       this.$refs.cart.update();
     },
-  },
-  created() {
   }
 }
 </script>
@@ -135,13 +115,14 @@ export default {
           <SearchBar ref="search"></SearchBar>
         </div>
         <nav-navbar>
-          <Cart ref="cart" v-if="$route.fullPath[1] === 'c'" />
-          <div class="user-menu" v-if="!currentUserC && $route.fullPath[1] === 'c'">
+          <Cart ref="cart" :t="cartTimestamp" v-if="$route.fullPath[1] === 'c'" />
+          <div class="user-menu" v-if="$route.fullPath[1] === 'c'">
             <div class="menu-label">
-              <img class="user-avatar" src="http://127.0.0.1:3001/account.png" alt="">
-              <a href="#" class="user-text">Signin/Signup</a>
+              <img class="user-avatar" :src="userCAvatar" alt="">
+              <a href="#" class="user-text" v-if="!currentUserC">Signin/Signup</a>
+              <a href="#" class="user-text" v-else>{{ currentUserC.name }}</a>
             </div>
-            <ul class="menu-select">
+            <ul class="menu-select" v-if="!currentUserC">
               <li>
                 <RouterLink to="/c/signin">Signin</RouterLink>
               </li>
@@ -149,13 +130,24 @@ export default {
                 <RouterLink to="/c/signup">Signup</RouterLink>
               </li>
             </ul>
+            <ul class="menu-select" v-else>
+              <li>
+                <RouterLink to="/settings">
+                  <div>Settings</div>
+                </RouterLink>
+              </li>
+              <li @click="logOutC">
+                Sign Out
+              </li>
+            </ul>
           </div>
-          <div class="user-menu" v-if="!currentUserE && $route.fullPath[1] === 'm'">
+          <div class="user-menu" v-if="$route.fullPath[1] === 'm'">
             <div class="menu-label">
-              <img class="user-avatar" src="http://127.0.0.1:3001/account.png" alt="">
-              <a href="#" class="user-text">Signin/Signup</a>
+              <img class="user-avatar" :src="userEAvatar" alt="">
+              <a href="#" class="user-text" v-if="!currentUserE">Signin/Signup</a>
+              <a href="#" class="user-text" v-else>{{ currentUserE.name }}</a>
             </div>
-            <ul class="menu-select">
+            <ul class="menu-select" v-if="!currentUserE">
               <li>
                 <RouterLink to="/m/signin">Signin</RouterLink>
               </li>
@@ -163,35 +155,13 @@ export default {
                 <RouterLink to="/m/signup">Signup</RouterLink>
               </li>
             </ul>
-          </div>
-          <div class="user-menu" v-if="currentUserE && $route.fullPath[1] === 'm'">
-            <div class="menu-label">
-              <img ref="useravatar" class="user-avatar" :src="avtSrc" alt="">
-              <a href="#" class="user-text">{{ currentUserE.name }}</a>
-            </div>
-            <ul class="menu-select">
+            <ul class="menu-select" v-else>
               <li>
                 <RouterLink to="/settings">
                   <div>Settings</div>
                 </RouterLink>
               </li>
               <li @click="logOutE">
-                Sign Out
-              </li>
-            </ul>
-          </div>
-          <div class="user-menu" v-if="currentUserC && $route.fullPath[1] === 'c'">
-            <div class="menu-label">
-              <img ref="useravatar" class="user-avatar" :src="avtSrc" alt="">
-              <a href="#" class="user-text">{{ currentUserC.name }}</a>
-            </div>
-            <ul class="menu-select">
-              <li>
-                <RouterLink to="/settings">
-                  <div>Settings</div>
-                </RouterLink>
-              </li>
-              <li @click="logOutC">
                 Sign Out
               </li>
             </ul>
@@ -211,7 +181,7 @@ export default {
         </div>
         <div id="content">
           <Suspense>
-            <RouterView @updateAvatar="updateAvatar" @notification="createNotification" @search="search"
+            <RouterView @updateAuthentication="updateAuthentication" @notification="createNotification" @search="search"
               @updateCart="updateCart" v-slot="{ Component }">
               <Transition name="fade" mode="out-in">
                 <component :is="Component" />
@@ -589,8 +559,6 @@ nav-sidebar>a>svg {
     -o-border-radius: 0;
   }
 }
-
-@import url('https://fonts.googleapis.com/css?family=Titan+One');
 
 .credit {
   display: block;

@@ -23,6 +23,7 @@ class AuthService {
         if (response.data.accessToken) {
           response.data.userType = "CUSTOMER";
           localStorage.setItem('userC', JSON.stringify(response.data));
+          return response.data;
         }
         return response.data;
       });
@@ -31,24 +32,32 @@ class AuthService {
   registerE(user) {
     return axios.post(API_URL + '/m/signup', user);
   }
-  
+
   logoutE() {
     localStorage.removeItem('userE');
   }
-  logoutC() {
+  async logoutC() {
+    const id = JSON.parse(localStorage.getItem('userC'))?._id;
+    const cart = localStorage.getItem('cartItems' + id);
+    await axios.post(API_URL + '/c/savecart', { cart }, {
+      headers: {
+        ...authHeader(),
+      }
+    });
     localStorage.removeItem('userC');
+    localStorage.removeItem('cartItems' + id);
   }
 
   async updateprofile(user) {
     return await axios
       .post(API_URL + 'updateprofile', user, {
-        headers:{
+        headers: {
           ...authHeader(),
         }
       })
       .then(response => {
         localStorage.setItem(
-          'user', 
+          'user',
           JSON.stringify({
             ...JSON.parse(localStorage.getItem('user')),
             ...response.data.user

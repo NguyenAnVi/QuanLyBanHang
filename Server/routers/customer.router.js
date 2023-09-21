@@ -1,5 +1,5 @@
 import express from "express"
-import { signin, signup, updateProfile, updateAvatar } from "../controllers/auth/customer.controller.js";
+import { signin, signup, updateProfile, saveCart, updateAvatar } from "../controllers/auth/customer.controller.js";
 import {
   get as getProduct,
   getRecommendedProducts
@@ -12,6 +12,7 @@ export default () => {
   router.post("/signup", signup)
   router.get("/product/getdetail/:id", getProduct)
   router.get("/product/getrecommended", getRecommendedProducts)
+  router.post("/savecart", loginRequired, saveCart)
   router.post("/updateprofile", loginRequired, updateProfile)
   // router.post("/updateavatar", loginRequired, updateAvatar);
   return router

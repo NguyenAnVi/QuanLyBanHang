@@ -54,8 +54,8 @@ export const userC = {
         }
       );
     },
-    logout({ commit }) {
-      AuthService.logoutC();
+    async logout({ commit }) {
+      await AuthService.logoutC();
       commit('logout');
     },
   },

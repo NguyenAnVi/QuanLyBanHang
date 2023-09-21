@@ -1,5 +1,6 @@
 // import axios from 'axios';
 const state = {
+  user: "",
   cartItems: []
 }
 
@@ -7,14 +8,21 @@ export const cart = {
   namespaced: true,
   state,
   actions: {
-    getCartItems({ commit }) {
-      commit('UPDATE_CART_ITEMS', JSON.parse(localStorage.getItem('cartItems')))
-      // axios.get('/cart').then((response) => {
-      //   commit('UPDATE_CART_ITEMS', response.data)
-      // });
+    setUser({ commit }, user) {
+      commit('UPDATE_USER', user);
     },
-    addCartItem({ commit }, cartItem) {
-      let cart = JSON.parse(localStorage.getItem('cartItems')) || [];
+    getCartItemsFromUser({ state }) {
+      if (state.user !== "") {
+        console.log("object:", JSON.parse(localStorage.getItem('userC'))?.cart);
+        let cart = JSON.parse(JSON.parse(localStorage.getItem('userC'))?.cart) || [];
+        localStorage.setItem('cartItems' + state.user, JSON.stringify(cart));
+      }
+    },
+    getCartItems({ commit, state }) {
+      commit('UPDATE_CART_ITEMS', JSON.parse(localStorage.getItem('cartItems' + state.user)))
+    },
+    addCartItem({ commit, state }, cartItem) {
+      let cart = JSON.parse(localStorage.getItem('cartItems' + state.user)) || [];
       var check = true;
       cart.forEach(function (c, i) {
         if (c.productId == cartItem.productId) {
@@ -28,15 +36,12 @@ export const cart = {
       });
       if (check)
         cart = [...cart, cartItem];
-      localStorage.setItem('cartItems', JSON.stringify(cart));
+      localStorage.setItem('cartItems' + state.user, JSON.stringify(cart));
       commit('UPDATE_CART_ITEMS', cart)
-      // axios.post('/cart', cartItem).then((response) => {
-      //   commit('UPDATE_CART_ITEMS', response.data)
-      // });
     },
-    updateQuantity({ commit }, payload) {
+    updateQuantity({ commit, state }, payload) {
       const { index, newQuantity, newMaxQuantity } = payload;
-      let cart = JSON.parse(localStorage.getItem('cartItems')) || [];
+      let cart = JSON.parse(localStorage.getItem('cartItems' + state.user)) || [];
 
       cart[index].quantity = newQuantity;
       if (newMaxQuantity) {
@@ -45,7 +50,7 @@ export const cart = {
       if (cart[index].quantity > cart[index].maxQuantity) {
         cart[index].quantity = cart[index].maxQuantity;
       }
-      localStorage.setItem('cartItems', JSON.stringify(cart));
+      localStorage.setItem('cartItems' + state.user, JSON.stringify(cart));
       commit('UPDATE_CART_ITEMS', cart)
     },
     removeCartItem({ commit }, cartItem) {
@@ -65,12 +70,15 @@ export const cart = {
   mutations: {
     UPDATE_CART_ITEMS(state, payload) {
       state.cartItems = payload;
+    },
+    UPDATE_USER(state, payload) {
+      state.user = payload;
     }
   },
   getters: {
     cartItems: state => state.cartItems,
     cartTotal: state => {
-      return state.cartItems.reduce((acc, cartItem) => {
+      return state.cartItems?.reduce((acc, cartItem) => {
         return (cartItem.quantity * cartItem.orderPrice) + acc;
       }, 0);
     },

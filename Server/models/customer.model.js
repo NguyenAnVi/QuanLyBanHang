@@ -12,7 +12,7 @@ const CustomerSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    address:{
+    address: {
       type: String
     },
     phone: {
@@ -28,6 +28,7 @@ const CustomerSchema = new mongoose.Schema(
       },
     },
     avatar: { type: String },
+    cart: { type: String, default: "[]" }
   },
   { timestamps: true, collection: "Customers" }
 )
@@ -52,7 +53,7 @@ CustomerSchema.pre("save", function save(next) {
 
 CustomerSchema.methods.comparePassword = function (candidatePassword, cb) {
   bcrypt.compare(candidatePassword, this.password, function (err, isMatch) {
-    if (err) 
+    if (err)
       return cb(err, isMatch)
     else
       cb(null, isMatch)

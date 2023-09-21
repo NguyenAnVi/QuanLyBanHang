@@ -35,7 +35,7 @@ export default {
         message: "Already signed in",
         type: "success"
       }).then(() => {
-        this.$emit('updateAvatar');
+        this.$emit('updateAuthentication');
         this.$router.push("/")
       });
     }
@@ -45,8 +45,10 @@ export default {
       this.loading = true;
 
       this.$store.dispatch("userC/login", user).then(
-        () => {
-          this.$emit('updateAvatar');
+        (response) => {
+          this.$store.dispatch('cart/setUser', response._id);
+          this.$store.dispatch('cart/getCartItemsFromUser');
+          this.$emit('updateAuthentication');
           this.$router.go(-1);
         },
         (error) => {

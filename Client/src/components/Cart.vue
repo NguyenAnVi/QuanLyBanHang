@@ -4,6 +4,9 @@ import InputTypeNumber from '@/components/InputTypeNumber.vue';
 
 export default {
   name: "Cart",
+  props: {
+    t: Number
+  },
   data() {
     return {
       cartItems: [],
@@ -12,6 +15,9 @@ export default {
   },
   methods: {
     update() {
+      if (this.currentUserC) {
+        this.$store.dispatch("cart/setUser", this.currentUserC._id)
+      }
       this.$store.dispatch("cart/getCartItems");
       this.cartItems = this.$store.getters['cart/cartItems'];
     },
@@ -26,7 +32,7 @@ export default {
       return result;
     },
     removeAllCartItems() {
-      //
+      this.$store.dispatch('cart/removeAllCartItems');
     },
     removeCartItem($event) {
       const index = $event.currentTarget.getAttribute('data-index');
@@ -38,10 +44,18 @@ export default {
     }
   },
   computed: {
+    currentUserC() {
+      return this.$store.state.userC.user;
+    },
     cartQuantity() {
       return this.$store.getters["cart/cartQuantity"]
     },
 
+  },
+  watch: {
+    t() {
+      this.update();
+    }
   },
   created() {
     this.update();

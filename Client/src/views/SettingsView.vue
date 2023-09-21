@@ -145,7 +145,7 @@ export default {
           this.loading = false;
         }
       );
-      this.$emit('updateAvatar');
+      this.$emit('updateAuthentication');
     }
   }
 }
