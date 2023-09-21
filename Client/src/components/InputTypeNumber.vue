@@ -62,6 +62,9 @@ export default {
     }
   },
   watch: {
+    value(v) {
+      this.currentValue = v;
+    },
     async currentValue(v) {
       if (v < this.min) {
         this.currentValue = this.min;

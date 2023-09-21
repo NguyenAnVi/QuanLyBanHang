@@ -25,7 +25,8 @@ export default {
       routerRoutes,
       userCAvatar: "",
       userEAvatar: "",
-      cartTimestamp: Date.now()
+      cartTimestamp: Date.now(),
+      origin: location.origin
     }
   },
   watch: {
@@ -75,7 +76,7 @@ export default {
       this.$router.go('/m');
     },
     updateAuthentication() {
-      const defaultAvtSrc = "http://localhost:3001/account.png";
+      const defaultAvtSrc = this.origin + "/account.png";
       const newUserCAvatar = JSON.parse(localStorage.getItem('userC'))?.avatar || defaultAvtSrc;
       const newUserEAvatar = JSON.parse(localStorage.getItem('userE'))?.avatar || defaultAvtSrc;
       this.userCAvatar = newUserCAvatar + "?t=" + Date.now();

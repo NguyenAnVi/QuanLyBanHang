@@ -13,7 +13,6 @@ export const cart = {
     },
     getCartItemsFromUser({ state }) {
       if (state.user !== "") {
-        console.log("object:", JSON.parse(localStorage.getItem('userC'))?.cart);
         let cart = JSON.parse(JSON.parse(localStorage.getItem('userC'))?.cart) || [];
         localStorage.setItem('cartItems' + state.user, JSON.stringify(cart));
       }
@@ -53,18 +52,17 @@ export const cart = {
       localStorage.setItem('cartItems' + state.user, JSON.stringify(cart));
       commit('UPDATE_CART_ITEMS', cart)
     },
-    removeCartItem({ commit }, cartItem) {
-      commit('UPDATE_CART_ITEMS', JSON.parse(localStorage.getItem('cartItems')).filter(c => !(c.productId == cartItem.productId)))
-      // axios.delete('/cart/delete', cartItem).then((response) => {
-      //   commit('UPDATE_CART_ITEMS', response.data)
-      // });
+    removeCartItem({ commit, state }, cartItem) {
+      console.log(cartItem);
+      const newCart = JSON.parse(localStorage.getItem('cartItems' + state.user))
+        .filter(c => (c.productId !== cartItem.productId))
+      console.log(newCart);
+      localStorage.setItem('cartItems' + state.user, JSON.stringify(newCart));
+      commit('UPDATE_CART_ITEMS', newCart)
     },
-    removeAllCartItems({ commit }) {
-      localStorage.removeItem('cartItems');
-      commit('UPDATE_CART_ITEMS', JSON.parse(localStorage.getItem('cartItems')))
-      // axios.delete('/cart/delete/all').then((response) => {
-      //   commit('UPDATE_CART_ITEMS', response.data)
-      // });
+    removeAllCartItems({ commit, state }) {
+      localStorage.removeItem('cartItems' + state.user);
+      commit('UPDATE_CART_ITEMS', [])
     }
   },
   mutations: {

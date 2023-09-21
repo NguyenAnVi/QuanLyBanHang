@@ -10,7 +10,8 @@ export default {
   data() {
     return {
       cartItems: [],
-      showModal: false
+      showModal: false,
+      origin: location.origin
     };
   },
   methods: {
@@ -33,10 +34,17 @@ export default {
     },
     removeAllCartItems() {
       this.$store.dispatch('cart/removeAllCartItems');
+      this.update()
     },
     removeCartItem($event) {
-      const index = $event.currentTarget.getAttribute('data-index');
-      this.$store.dispatch('cart/removeCartItem')
+      const pid = $event.currentTarget.getAttribute('data-pid');
+      console.log($event.target.getAttribute('data-pid'));
+      console.log($event.currentTarget.getAttribute('data-pid'));
+      this.$store.dispatch('cart/removeCartItem', { productId: pid })
+
+      this.cartItems = [];
+      this.$forceUpdate();
+      this.update()
     },
     cartChangedHandler(payload) {
       this.$store.dispatch('cart/updateQuantity', { index: payload.params.index, newQuantity: payload.value })
@@ -66,16 +74,16 @@ export default {
 <template>
   <div class="menu">
     <div @click="showModalHandler" class="menu-label">
-      <img class="icon" src="http://127.0.0.1:3001/cart.png" alt="">
+      <img class="icon" :src="origin + '/cart.png'" alt="">
       <a href="#" class="text">Cart: {{ cartQuantity }}</a>
     </div>
     <Teleport to="body">
       <CartModal width="500px" :show="showModal" @close="hideModalHandler">
-        <template #header>
+        <template #header v-once>
           <h3>Cart items</h3>
         </template>
         <template #body>
-          <table class="table">
+          <table class="table" v-if="cartItems?.length > 0">
             <tr>
               <th class="shrink"></th>
               <th></th>
@@ -83,9 +91,10 @@ export default {
               <th class="shrink">Price</th>
               <th class="shrink">SubTotal</th>
             </tr>
-            <tr v-for="(item, index) in cartItems" :data-pid="item.productId">
+            <tr v-for="(item, index) in cartItems" :key="index" :data-pid="item.productId">
               <td>
-                <button type="button" role="remove" @click="removeCartItem" :data-index="index">X</button>
+                <button type="button" role="remove" @click.self="removeCartItem" :data-pid="item.productId"
+                  :data-quantity="item.quantity">X</button>
               </td>
               <td>{{ item.productName }}</td>
               <td class="shrink">
@@ -100,8 +109,11 @@ export default {
               <th>{{ toPrice($store.getters['cart/cartTotal']) }}</th>
             </tr>
           </table>
+          <div v-else v-once>
+            <img class="empty-cart-img" :src="origin + '/emptycart.webp'" alt="">
+          </div>
         </template>
-        <template #footer>
+        <template #footer v-once>
           <button class="modal-default-button" @click="hideModalHandler">OK</button>
           <button class="modal-default-button remove" @click="removeAllCartItems">Remove all</button>
         </template>
@@ -179,5 +191,9 @@ button.remove {
 
 th.shrink {
   text-align: center;
+}
+
+.empty-cart-img {
+  width: 100%;
 }
 </style>
