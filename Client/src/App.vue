@@ -7,6 +7,7 @@ import { faBars, faUser, faArrowRightFromBracket, faHouse, faCloudArrowUp, faGea
 import { useToast } from "vue-toastification";
 import SearchBar from "@/components/SearchBar.vue";
 import Cart from "./components/Cart.vue";
+import Sidebar from "./components/Sidebar.vue";
 
 const toast = useToast();
 library.add(faBars, faUser, faArrowRightFromBracket, faHouse, faCloudArrowUp, faGear);
@@ -14,12 +15,12 @@ library.add(faBars, faUser, faArrowRightFromBracket, faHouse, faCloudArrowUp, fa
 export default {
   components: {
     NavNavbar: 'nav-navbar',
-    NavSidebar: 'nav-sidebar',
     Suspense,
     Transition,
     SearchBar,
-    Cart
-  },
+    Cart,
+    Sidebar
+},
   data() {
     return {
       routerRoutes,
@@ -36,23 +37,6 @@ export default {
     }
   },
   mounted() {
-    const sidebar = document.getElementById("sidebar");
-    const openSideBar = (sb) => {
-      sb.classList.add("opened");
-    };
-    const closeSideBar = (sb) => {
-      sb.classList.remove("opened");
-    };
-    const toggleSideBar = (sb) => {
-      if (sb.classList.contains("opened"))
-        closeSideBar(sb);
-      else
-        openSideBar(sb);
-    };
-    const logo = document.getElementById("sidebar-toggler");
-    logo.addEventListener('click', () => {
-      toggleSideBar(sidebar);
-    });
     this.updateAuthentication();
   },
   computed: {
@@ -107,7 +91,7 @@ export default {
     <div id="appWrapper">
       <div id="header">
         <div>
-          <font-awesome-icon id="sidebar-toggler" :icon="['fas', 'bars']" size="lg" />
+          <font-awesome-icon id="sidebar-toggler" @click="$refs.sidebar.toggle()" :icon="['fas', 'bars']" size="lg" />
           <img id="logo" alt="logo" class="logo" src="@/assets/logo.svg" />
           <span
             style="color:var(--primary-color); font-size: larger; font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;">QUANLYBANHANG</span>
@@ -170,16 +154,7 @@ export default {
         </nav-navbar>
       </div>
       <div id="body">
-        <div id="sidebar" class="" ref="sidebar">
-          <nav-sidebar>
-            <!-- {{ routerRoutes }} -->
-            <RouterLink v-for="route in routerRoutes" v-show="route.showInSideBar === $route.fullPath[1]"
-              :to="route.path">
-              <font-awesome-icon v-if="route.icon" :icon="route.icon" />
-              <div>{{ route.title }}</div>
-            </RouterLink>
-          </nav-sidebar>
-        </div>
+        <Sidebar ref="sidebar" :routes="routerRoutes"></Sidebar>
         <div id="content">
           <Suspense>
             <RouterView @updateAuthentication="updateAuthentication" @notification="createNotification" @search="search"
@@ -231,7 +206,7 @@ export default {
 
   /* Scale the background image to be as large as possible */
   background-size: cover;
-  background-image: url(@/../public/background.jpg);
+  background-image: url(@/../background.jpg);
   border-radius: 8px;
 }
 
@@ -424,27 +399,6 @@ export default {
   min-height: calc(100vh - var(--header-height) - var(--footer-height) - 48px);
 }
 
-#sidebar {
-  box-sizing: border-box;
-  overflow: hidden;
-  min-width: var(--sidebar-icon-width);
-  width: var(--sidebar-icon-width);
-  margin-right: 8px;
-  background-color: #0000003f;
-
-  backdrop-filter: blur(10px);
-
-  transition-property: width, min-width;
-  transition-duration: .5s;
-  transition-timing-function: ease-in-out;
-}
-
-#sidebar.opened,
-#sidebar:hover {
-  min-width: var(--sidebar-width);
-  width: var(--sidebar-width);
-}
-
 #content {
   flex-shrink: 0;
   background-color: #ffffff77;
@@ -477,73 +431,7 @@ export default {
   max-height: calc(var(--header-height) - 8px);
 }
 
-nav-sidebar {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  min-width: var(--sidebar-width);
-  font-size: 16px;
-  border-radius: 8px 0 0 8px;
-  -webkit-border-radius: 8px 0 0 8px;
-  -moz-border-radius: 8px 0 0 8px;
-  -ms-border-radius: 8px 0 0 8px;
-  -o-border-radius: 8px 0 0 8px;
-}
 
-nav-sidebar>a {
-  border-radius: 8px 0 0 8px;
-  background-color: #ffffff88;
-  display: flexbox;
-  width: var(--sidebar-width);
-  height: var(--sidebar-icon-width);
-  align-items: center;
-  transition-property: background-color, height;
-  transition-duration: .2s;
-  transition-timing-function: ease-in-out;
-
-  &:hover {
-    z-index: 2;
-  }
-
-  &:focus {
-    z-index: 1;
-  }
-
-  &:hover,
-  &:focus,
-  &.router-link-exact-active {
-    height: calc(var(--sidebar-icon-width) + 16px);
-    box-shadow: 0 0 5px #414141;
-    background-color: #fff;
-  }
-}
-
-nav-sidebar>a.router-link-exact-active {
-  border-radius: 8px 0 0 8px;
-  -webkit-border-radius: 8px 0 0 8px;
-  -moz-border-radius: 8px 0 0 8px;
-  -ms-border-radius: 8px 0 0 8px;
-  -o-border-radius: 8px 0 0 8px;
-
-  &:hover {
-    cursor: default;
-  }
-}
-
-nav-sidebar>a {
-  display: flex;
-}
-
-nav-sidebar>a>div {
-  display: inline-block;
-}
-
-nav-sidebar>a>svg {
-  width: var(--sidebar-icon-width);
-  max-height: 100%;
-  align-items: center;
-  box-sizing: border-box;
-}
 
 #footer>* {
   flex: 1 1 1px;
