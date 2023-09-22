@@ -51,14 +51,14 @@ export default {
       return this.$store.state.userE.status.loggedIn;
     },
   },
-  mounted() {
+  created() {
     if (this.loggedIn) {
-      this.$store.dispatch('notification/createNotification', {
-        message: "Already signed in",
-        type: "success"
-      }).then(() => {
-        this.$router.push("/m");
-      });
+      this.$emit('notification', {
+        message: "Signed in",
+        type: "info"
+      })
+      this.$emit('updateAuthentication');
+      this.$router.push(this.$route.query.redirect || "/m/signin")
     }
   },
   methods: {
@@ -72,6 +72,10 @@ export default {
           this.message = data.message;
           this.successful = true;
           this.loading = false;
+          this.$emit('notification', {
+            message: "Account created",
+            type: "success"
+          })
           this.$router.push("/m/signin");
         },
         (error) => {

@@ -31,13 +31,12 @@ export default {
   },
   created() {
     if (this.loggedIn) {
-      this.$store.dispatch('notification/createNotification', {
-        message: "Already signed in",
-        type: "success"
-      }).then(() => {
-        this.$emit('updateAuthentication');
-        this.$router.push("/")
-      });
+      this.$emit('notification', {
+        message: "Signed in",
+        type: "info"
+      })
+      this.$emit('updateAuthentication');
+      this.$router.push(this.$route.query.redirect || "/")
     }
   },
   methods: {
@@ -49,7 +48,7 @@ export default {
           this.$store.dispatch('cart/setUser', response._id);
           this.$store.dispatch('cart/getCartItemsFromUser');
           this.$emit('updateAuthentication');
-          this.$router.go(-1);
+          this.$router.push(this.$route.query.redirect || "/");
         },
         (error) => {
           this.loading = false;

@@ -32,10 +32,10 @@ export default{
     <div id="sidebar" ref="sidebar">
         <nav-sidebar>
         <!-- {{ routerRoutes }} -->
-        <RouterLink v-for="route in routes" v-show="route.showInSideBar === $route.fullPath[1]"
+        <RouterLink v-for="route in routes" v-show="route.meta?.showInSidebar === $route.fullPath[1]"
             :to="route.path">
-            <font-awesome-icon v-if="route.icon" :icon="route.icon" />
-            <div>{{ route.title }}</div>
+            <font-awesome-icon v-if="route.meta?.sidebarIcon" :icon="route.meta?.sidebarIcon" />
+            <div>{{ route.meta?.title }}</div>
         </RouterLink>
         </nav-sidebar>
     </div>

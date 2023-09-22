@@ -34,7 +34,6 @@ export default {
     try {
       this.$store.dispatch('product/getRecommendedProducts')
         .then((data) => {
-          console.log(data);
           this.products = data.products;
           this.productImages = data.images;
         })

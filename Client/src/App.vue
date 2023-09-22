@@ -6,8 +6,8 @@ import { library } from '@fortawesome/fontawesome-svg-core';
 import { faBars, faUser, faArrowRightFromBracket, faHouse, faCloudArrowUp, faGear } from '@fortawesome/free-solid-svg-icons';
 import { useToast } from "vue-toastification";
 import SearchBar from "@/components/SearchBar.vue";
-import Cart from "./components/Cart.vue";
-import Sidebar from "./components/Sidebar.vue";
+import Cart from "@/components/Cart.vue";
+import Sidebar from "@/components/Sidebar.vue";
 
 const toast = useToast();
 library.add(faBars, faUser, faArrowRightFromBracket, faHouse, faCloudArrowUp, faGear);
@@ -29,24 +29,6 @@ export default {
       cartTimestamp: Date.now(),
       origin: location.origin
     }
-  },
-  watch: {
-    '$route'(to, from) {
-      const title = this.routerRoutes.filter(r => (r.name === to.name))[0].title;
-      document.title = title;
-    }
-  },
-  mounted() {
-    this.updateAuthentication();
-  },
-  computed: {
-    currentUserC() {
-      return this.$store.state.userC.user;
-    },
-    currentUserE() {
-      return this.$store.state.userE.user;
-    },
-
   },
   methods: {
     async logOutC() {
@@ -82,7 +64,38 @@ export default {
     updateCart() {
       this.$refs.cart.update();
     },
-  }
+    checkAuth(to){
+      document.title = to?.meta.title;
+      if(to.meta.requiresAuth){
+        const authType = to.fullPath[1];
+        if(     (authType == 'c' && !this.$store.state.userC.status.loggedIn) 
+            ||  (authType == 'm' && !this.$store.state.userE.status.loggedIn)){
+          this.$router.push({
+            path: '/'+authType+'/signin',
+            query: { redirect: to.fullPath } // Add the current path as a query parameter
+          })
+        }
+      }
+    }
+  },
+  watch: {
+    '$route'(to, from) {
+      this.checkAuth(to);
+    }
+  },
+  mounted() {
+    this.checkAuth(this.$route);
+    this.updateAuthentication();
+  },
+  computed: {
+    currentUserC() {
+      return this.$store.state.userC.user;
+    },
+    currentUserE() {
+      return this.$store.state.userE.user;
+    },
+
+  },
 }
 </script>
 
@@ -157,7 +170,7 @@ export default {
         <Sidebar ref="sidebar" :routes="routerRoutes"></Sidebar>
         <div id="content">
           <Suspense>
-            <RouterView @updateAuthentication="updateAuthentication" @notification="createNotification" @search="search"
+            <RouterView @checkAuth="checkAuth" @updateAuthentication="updateAuthentication" @notification="createNotification" @search="search"
               @updateCart="updateCart" v-slot="{ Component }">
               <Transition name="fade" mode="out-in">
                 <component :is="Component" />

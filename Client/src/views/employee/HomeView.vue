@@ -37,12 +37,7 @@ export default {
       gsap.to(this, { duration: 0.5, newOrderCountTweened: Number(n) || 0 })
     }
   },
-  created() {
-    if (!this.loggedIn) {
-      this.$router.push({ name: 'm.signin' })
-    }
-  },
-  mounted() {
+  async mounted() {
     this.newProductCount = this.$store.dispatch('util/newProductCount')
       .then((res) => {
         this.newProductCount = res;
@@ -61,7 +56,7 @@ export default {
 
 <template>
   <main id="main">
-    <h1>Good {{ getTimeOfDay }}, {{ currentUser.name }}!</h1>
+    <h1>Good {{ getTimeOfDay }}, {{ currentUser?.name }}!</h1>
     <div class="info-wrapper">
       <div class="anal"> <!-- analytic -->
         <div class="info-card">

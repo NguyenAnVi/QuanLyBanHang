@@ -33,11 +33,11 @@ export default {
   created() {
     if (this.loggedIn) {
       this.$emit('notification', {
-        message: "Already signed in",
+        message: "Signed in",
         type: "info"
       })
       this.$emit('updateAuthentication');
-      this.$router.push("/m")
+      this.$router.push(this.$route.query.redirect || "/m")
     }
   },
   methods: {
@@ -47,7 +47,7 @@ export default {
       this.$store.dispatch("userE/login", user).then(
         () => {
           this.$emit('updateAuthentication');
-          this.$router.go(-1);
+          this.$router.push(this.$route.query.redirect || "/m");
         },
         (error) => {
           this.loading = false;
@@ -57,7 +57,7 @@ export default {
               error.response.data.message) ||
             error.message ||
             error.toString();
-          this.$emit("notification", { message: error.response?.data.message || error.message, type: "success" });
+          this.$emit("notification", { message: error.response?.data.message || error.message, type: "error" });
         }
       );
     },

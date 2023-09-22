@@ -53,10 +53,8 @@ export const cart = {
       commit('UPDATE_CART_ITEMS', cart)
     },
     removeCartItem({ commit, state }, cartItem) {
-      console.log(cartItem);
       const newCart = JSON.parse(localStorage.getItem('cartItems' + state.user))
         .filter(c => (c.productId !== cartItem.productId))
-      console.log(newCart);
       localStorage.setItem('cartItems' + state.user, JSON.stringify(newCart));
       commit('UPDATE_CART_ITEMS', newCart)
     },
