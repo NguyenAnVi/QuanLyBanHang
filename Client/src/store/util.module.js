@@ -1,7 +1,4 @@
 import apiService from '../services/api.service';
-const state = {
-  productItems: []
-}
 const actions = {
   newProductCount() {
     return new Promise((resolve, reject) => {
@@ -27,6 +24,6 @@ const actions = {
 }
 export const util = {
   namespaced: true,
-  state,
+  state: null,
   actions,
 }

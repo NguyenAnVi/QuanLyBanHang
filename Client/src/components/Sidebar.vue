@@ -1,44 +1,43 @@
 <script>
-export default{
-  name:"Sidebar",
-  components:{
-    NavSidebar:'nav-sidebar'
+export default {
+  name: "Sidebar",
+  components: {
+    NavSidebar: 'nav-sidebar'
   },
-  props:{
-    routes:Object,
+  props: {
+    routes: Object,
   },
-  methods:{
-    expand(){
-      this.$refs.sidebar.$el.classList.add("opened");
+  methods: {
+    expand() {
+      this.$refs.sidebarContainer.classList.add("opened");
+      this.$emit('opened')
     },
-    shrink(){
-      this.$refs.sidebar.$el.classList.remove("opened");
+    shrink() {
+      this.$refs.sidebarContainer.classList.remove("opened");
+      this.$emit('closed')
     },
-    toggle(){
-      if (this.isExpanded)
-        this.expand();
-      else
-        this.shrink();
-    }
-  },
-  computed:{
-    isExpanded(){
-      return this.$refs.sidebar.$el.classList.contains("opended");
+    toggle() {
+      this.$nextTick(() => {
+        if (this.$refs.sidebarContainer.classList.contains("opened"))
+          this.shrink()
+        else
+          this.expand()
+        return;
+      })
     }
   },
 }
 </script>
 <template>
-    <div id="sidebar" ref="sidebar">
-        <nav-sidebar>
-        <!-- {{ routerRoutes }} -->
-        <RouterLink v-for="route in routes" v-show="route.meta?.showInSidebar === $route.fullPath[1]"
-            :to="route.path">
-            <font-awesome-icon v-if="route.meta?.sidebarIcon" :icon="route.meta?.sidebarIcon" />
-            <div>{{ route.meta?.title }}</div>
-        </RouterLink>
-        </nav-sidebar>
-    </div>
+  <div id="sidebar" ref="sidebarContainer">
+    <nav-sidebar>
+      <!-- {{ routerRoutes }} -->
+      <RouterLink v-for="route in routes" v-show="route.meta?.showInSidebar === $route.fullPath[1]" :to="route.path">
+        <font-awesome-icon v-if="route.meta?.sidebarIcon" :icon="route.meta?.sidebarIcon" />
+        <div>{{ route.meta?.title }}</div>
+      </RouterLink>
+    </nav-sidebar>
+  </div>
 </template>
 <style scoped>
 #sidebar {
@@ -61,6 +60,7 @@ export default{
   min-width: var(--sidebar-width);
   width: var(--sidebar-width);
 }
+
 nav-sidebar {
   display: flex;
   flex-direction: column;

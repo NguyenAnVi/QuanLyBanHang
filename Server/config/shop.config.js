@@ -11,8 +11,12 @@ const AvailableOrderStatus = [
   'COMPLETED',
   'CANCELLED'
 ]
+const AvailablePaymentMethods = [
+  'CASH_ON_DELIVERY'
+]
 
 export {
   AvailableEmployeeDuties,
-  AvailableOrderStatus
+  AvailableOrderStatus,
+  AvailablePaymentMethods
 }

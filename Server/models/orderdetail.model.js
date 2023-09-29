@@ -1,4 +1,3 @@
-import { AvailableOrderStatus } from '../config/shop.config.js'
 import mongoose from "../providers/database.js";
 
 const OrderDetailSchema = new mongoose.Schema(
@@ -10,6 +9,10 @@ const OrderDetailSchema = new mongoose.Schema(
     productId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true
+    },
+    productName: {
+      type: String,
+      default: "Unnamed Product"
     },
     quantity: {
       type: mongoose.Schema.Types.Number,

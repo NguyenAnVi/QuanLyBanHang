@@ -93,7 +93,6 @@ class ApiService {
         });
     })
   }
-
   async getProductEdit(id) {
     return await axios
       .get(API_URL + '/m/product/get/' + id, { headers: { ...authHeaderE() } })
@@ -161,6 +160,23 @@ class ApiService {
     return await axios
       .get(API_URL + '/m/newusercount', { headers: { ...authHeaderE() } })
       .then(response => response.data)
+  }
+  async placeOrder(order) {
+    return new Promise(async (resolve, reject) => {
+      await axios
+        .post(API_URL + '/c/order/placeorder',
+          { data: order },
+          { headers: { ...authHeader() } }
+        )
+        .then(response => {
+          const data = response;
+          resolve(data)
+        })
+        .catch(error => {
+          console.log(error);
+          reject(error);
+        });
+    })
   }
 }
 

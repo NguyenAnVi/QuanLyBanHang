@@ -1,30 +1,24 @@
-import {AvailableOrderStatus} from '../config/shop.config.js'
+import { AvailableOrderStatus, AvailablePaymentMethods } from '../config/shop.config.js'
 import mongoose from "../providers/database.js";
 
 const OrderSchema = new mongoose.Schema(
   {
-    orderId:{
-      type: String,
-      unique: true, 
-      default: "DH"+Date.now(),
-      required: true
-    },
-    customerId:{
+    customerId: { // tai khoan dat hang
       type: mongoose.Schema.Types.ObjectId,
       required: true
     },
-    employeeId:{
-      type: mongoose.Schema.Types.ObjectId,
-      required: true
-    },
-    ordered_at: {
+    receiverName: String, // ten nguoi nhan
+    receiverPhone: String,
+    receiverAddress: String,
+    employeeId: mongoose.Schema.Types.ObjectId,
+    orderedAt: {
       type: Date,
+      default: Date.now()
     },
-    delivered_at: {
-      type: Date
-    },
+    deliveredAt: Date,
     status: {
       type: String,
+      default: AvailableOrderStatus[0],
       validate: {
         validator(v) {
           return AvailableOrderStatus.includes(v);
@@ -33,6 +27,21 @@ const OrderSchema = new mongoose.Schema(
           `${props.value} is not a valid OrderStatus, Check Server/config/shop!`,
       },
     },
+    message: String,
+    paymentMethod: {
+      type: String,
+      required: true,
+      validate: {
+        validator(v) {
+          return AvailablePaymentMethods.includes(v);
+        },
+        message: (props) =>
+          `${props.value} is not a valid PaymentMethod, Check Server/config/shop!`,
+      },
+    },
+    subTotal: Number,
+    total: Number,
+    shippingFee: Number,
   },
   { timestamps: true, collection: "Orders" }
 );

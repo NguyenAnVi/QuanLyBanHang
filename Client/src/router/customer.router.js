@@ -2,7 +2,7 @@ export default [
   {
     path: '/c',
     name: 'c',
-    meta:{
+    meta: {
       title: 'Customer Home',
       sidebarIcon: 'house',
       showInSidebar: 'c',
@@ -12,7 +12,7 @@ export default [
   {
     path: '/c/signin',
     name: 'c.signin',
-    meta:{
+    meta: {
       title: 'Customer Signin',
     },
     component: () => import('@/views/customer/authentication/Signin.vue')
@@ -20,7 +20,7 @@ export default [
   {
     path: '/c/signup',
     name: 'c.signup',
-    meta:{
+    meta: {
       title: 'Customer Signup',
     },
     component: () => import('@/views/customer/authentication/Signup.vue')
@@ -28,9 +28,26 @@ export default [
   {
     path: '/c/product/:id',
     name: 'c.product',
-    meta:{
+    meta: {
       title: 'Product',
     },
     component: () => import('@/views/customer/Product.vue')
+  },
+  {
+    path: '/c/checkout',
+    name: 'c.checkout',
+    meta: {
+      title: 'Checkout',
+      requiresAuth: true
+    },
+    component: () => import('@/views/customer/Checkout.vue')
+  },
+  {
+    path: '/c/order/success',
+    name: 'c.order.success',
+    meta: {
+      title: 'Order success',
+    },
+    component: () => import('@/views/customer/OrderSuccess.vue')
   },
 ]

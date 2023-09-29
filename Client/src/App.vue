@@ -20,7 +20,7 @@ export default {
     SearchBar,
     Cart,
     Sidebar
-},
+  },
   data() {
     return {
       routerRoutes,
@@ -64,18 +64,24 @@ export default {
     updateCart() {
       this.$refs.cart.update();
     },
-    checkAuth(to){
+    checkAuth(to) {
       document.title = to?.meta.title;
-      if(to.meta.requiresAuth){
+      if (to.meta.requiresAuth) {
         const authType = to.fullPath[1];
-        if(     (authType == 'c' && !this.$store.state.userC.status.loggedIn) 
-            ||  (authType == 'm' && !this.$store.state.userE.status.loggedIn)){
+        if ((authType == 'c' && !this.$store.state.userC.status.loggedIn)
+          || (authType == 'm' && !this.$store.state.userE.status.loggedIn)) {
           this.$router.push({
-            path: '/'+authType+'/signin',
+            path: '/' + authType + '/signin',
             query: { redirect: to.fullPath } // Add the current path as a query parameter
           })
         }
       }
+    },
+    shrinkContent() {
+      this.$refs.content.classList.add('sidebar-opened')
+    },
+    expandContent() {
+      this.$refs.content.classList.remove('sidebar-opened')
     }
   },
   watch: {
@@ -113,7 +119,7 @@ export default {
           <SearchBar ref="search"></SearchBar>
         </div>
         <nav-navbar>
-          <Cart ref="cart" :t="cartTimestamp" v-if="$route.fullPath[1] === 'c'" />
+          <Cart @notification="createNotification" ref="cart" :t="cartTimestamp" v-if="$route.fullPath[1] === 'c'" />
           <div class="user-menu" v-if="$route.fullPath[1] === 'c'">
             <div class="menu-label">
               <img class="user-avatar" :src="userCAvatar" alt="">
@@ -167,11 +173,11 @@ export default {
         </nav-navbar>
       </div>
       <div id="body">
-        <Sidebar ref="sidebar" :routes="routerRoutes"></Sidebar>
-        <div id="content">
+        <Sidebar ref="sidebar" @opened="shrinkContent" @closed="expandContent" :routes="routerRoutes"></Sidebar>
+        <div id="content" ref="content">
           <Suspense>
-            <RouterView @checkAuth="checkAuth" @updateAuthentication="updateAuthentication" @notification="createNotification" @search="search"
-              @updateCart="updateCart" v-slot="{ Component }">
+            <RouterView @checkAuth="checkAuth" @updateAuthentication="updateAuthentication"
+              @notification="createNotification" @search="search" @updateCart="updateCart" v-slot="{ Component }">
               <Transition name="fade" mode="out-in">
                 <component :is="Component" />
               </Transition>
@@ -417,11 +423,16 @@ export default {
   background-color: #ffffff77;
   backdrop-filter: blur(10px);
   width: calc(100% - var(--sidebar-icon-width) - 8px);
+  transition: width 2s ease-out;
 
   &>*:first-child {
     min-height: 100%;
     box-sizing: border-box;
   }
+}
+
+#content.sidebar-opened {
+  width: calc(100% - var(--sidebar-width) - 8px);
 }
 
 #footer {

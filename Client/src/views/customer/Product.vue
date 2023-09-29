@@ -185,8 +185,10 @@ main>* {
 }
 
 .product-detail {
-  width: auto;
+  max-width: 1080px;
   margin: 8px;
+  margin-left: auto;
+  margin-right: auto;
   padding: 8px;
   border-radius: 8px;
   flex: 1 0 auto;

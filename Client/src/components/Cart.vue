@@ -1,5 +1,5 @@
 <script>
-import CartModal from './Modal.vue';
+import CartModal from '@/components/Modal.vue';
 import InputTypeNumber from '@/components/InputTypeNumber.vue';
 
 export default {
@@ -28,18 +28,31 @@ export default {
     hideModalHandler() {
       this.showModal = false;
     },
+    checkOutHandler() {
+      this.showModal = false;
+      this.$router.push({ name: "c.checkout" })
+    },
     toPrice(v = 0) {
       const result = parseInt(v).toLocaleString('vi', { style: 'currency', currency: 'VND' });
       return result;
     },
     removeAllCartItems() {
-      this.$store.dispatch('cart/removeAllCartItems');
-      this.update()
+      if (window.confirm("Are you sure to remove all cart items?")) {
+        this.$store.dispatch('cart/removeAllCartItems');
+        this.$emit('notification', {
+          message: "Removed!",
+          type: "success"
+        })
+        this.update()
+
+      }
     },
     removeCartItem($event) {
+      this.$emit('notification', {
+        message: "Removed!",
+        type: "success"
+      })
       const pid = $event.currentTarget.getAttribute('data-pid');
-      console.log($event.target.getAttribute('data-pid'));
-      console.log($event.currentTarget.getAttribute('data-pid'));
       this.$store.dispatch('cart/removeCartItem', { productId: pid })
 
       this.cartItems = [];
@@ -85,16 +98,16 @@ export default {
         <template #body>
           <table class="table" v-if="cartItems?.length > 0">
             <tr>
-              <th class="shrink"></th>
-              <th></th>
+              <th class="shrink">Act</th>
+              <th>Name</th>
               <th class="shrink">Qty</th>
               <th class="shrink">Price</th>
               <th class="shrink">SubTotal</th>
             </tr>
             <tr v-for="(item, index) in cartItems" :key="index" :data-pid="item.productId">
               <td>
-                <button type="button" role="remove" @click.self="removeCartItem" :data-pid="item.productId"
-                  :data-quantity="item.quantity">X</button>
+                <button type="button" class="remove-item-button" role="remove" @click.self="removeCartItem"
+                  :data-pid="item.productId" :data-quantity="item.quantity"></button>
               </td>
               <td>{{ item.productName }}</td>
               <td class="shrink">
@@ -114,8 +127,11 @@ export default {
           </div>
         </template>
         <template #footer v-once>
-          <button class="modal-default-button" @click="hideModalHandler">OK</button>
-          <button class="modal-default-button remove" @click="removeAllCartItems">Remove all</button>
+          <button class="modal-default-button" @click="hideModalHandler">Close</button>
+          <button v-if="cartItems?.length > 0" class="modal-default-button primary" @click="checkOutHandler">Check
+            out</button>
+          <button v-if="cartItems?.length > 0" class="modal-default-button danger" @click="removeAllCartItems">Remove
+            all</button>
         </template>
       </CartModal>
     </Teleport>
@@ -161,11 +177,12 @@ export default {
 
 .table {
   width: 100%;
-  border-spacing: 4px;
+  border-spacing: 2px;
+  background-color: var(--primary-color);
 
 
-  &>tr:nth-child(even) {
-    background: linear-gradient(to right, #fff, #008d6033, #008d6033, #008d6033, #008d6033, #008d6033, #008d6033, #fff);
+  &>tr {
+    background-color: white;
   }
 }
 
@@ -176,9 +193,29 @@ export default {
   border: none;
 }
 
-button.remove {
+button.primary {
+  color: #ddd;
+  background-color: var(--primary-color);
+}
+
+button.danger {
   color: #ddd;
   background-color: rgb(255, 56, 56);
+}
+
+button.remove-item-button {
+  width: 30px;
+  color: red;
+  font-size: 1.2em;
+
+  &::after {
+    content: "🗑";
+  }
+
+  &:hover {
+    box-shadow: none;
+    background-color: rgb(255, 214, 214);
+  }
 }
 
 .shrink {
