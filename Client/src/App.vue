@@ -1,29 +1,26 @@
 <script>
 import { Suspense, Transition } from "vue";
-import { routes as routerRoutes } from "./router/index.js";
-import { RouterLink, RouterView } from "vue-router";
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faBars, faUser, faArrowRightFromBracket, faHouse, faCloudArrowUp, faGear } from '@fortawesome/free-solid-svg-icons';
+import { faBars, faHouse } from '@fortawesome/free-solid-svg-icons';
 import { useToast } from "vue-toastification";
 import SearchBar from "@/components/SearchBar.vue";
 import Cart from "@/components/Cart.vue";
 import Sidebar from "@/components/Sidebar.vue";
 
 const toast = useToast();
-library.add(faBars, faUser, faArrowRightFromBracket, faHouse, faCloudArrowUp, faGear);
+library.add(faBars, faHouse);
 
 export default {
   components: {
     NavNavbar: 'nav-navbar',
-    Suspense,
-    Transition,
     SearchBar,
     Cart,
     Sidebar
   },
   data() {
     return {
-      routerRoutes,
+      // routerRoutes: [],
+      routerRoutes: [...this.$router.options.routes[0].children, ...this.$router.options.routes[1].children],
       userCAvatar: "",
       userEAvatar: "",
       cartTimestamp: Date.now(),
@@ -34,12 +31,12 @@ export default {
     async logOutC() {
       await this.$store.dispatch('userC/logout');
       this.$store.state.userC.user = undefined;
-      this.$router.go('/c');
+      this.$router.back();
     },
-    logOutE() {
-      this.$store.dispatch('userE/logout');
+    async logOutE() {
+      await this.$store.dispatch('userE/logout');
       this.$store.state.userE.user = undefined;
-      this.$router.go('/m');
+      this.$router.back();
     },
     updateAuthentication() {
       const defaultAvtSrc = this.origin + "/account.png";
@@ -67,11 +64,16 @@ export default {
     checkAuth(to) {
       document.title = to?.meta.title;
       if (to.meta.requiresAuth) {
-        const authType = to.fullPath[1];
-        if ((authType == 'c' && !this.$store.state.userC.status.loggedIn)
-          || (authType == 'm' && !this.$store.state.userE.status.loggedIn)) {
+        const authType = this.$route.meta.userType;
+        if ((authType == 'CUSTOMER' && !this.$store.state.userC.status.loggedIn)) {
           this.$router.push({
-            path: '/' + authType + '/signin',
+            name: 'CustomerSignin',
+            query: { redirect: to.fullPath } // Add the current path as a query parameter
+          })
+        }
+        if ((authType == 'ADMIN' && !this.$store.state.userE.status.loggedIn)) {
+          this.$router.push({
+            name: 'AdminSignin',
             query: { redirect: to.fullPath } // Add the current path as a query parameter
           })
         }
@@ -82,10 +84,17 @@ export default {
     },
     expandContent() {
       this.$refs.content.classList.remove('sidebar-opened')
-    }
+    },
   },
   watch: {
     '$route'(to, from) {
+      if (to.meta.userType === "ADMIN") {
+        this.$refs.wrapper.classList.remove('customer-background');
+        this.$refs.wrapper.classList.add('admin-background');
+      } else {
+        this.$refs.wrapper.classList.add('customer-background');
+        this.$refs.wrapper.classList.remove('admin-background');
+      }
       this.checkAuth(to);
     }
   },
@@ -107,20 +116,33 @@ export default {
 
 <template>
   <div>
-    <div id="appWrapper">
+    <div id="appWrapper" ref="wrapper">
       <div id="header">
         <div>
-          <font-awesome-icon id="sidebar-toggler" @click="$refs.sidebar.toggle()" :icon="['fas', 'bars']" size="lg" />
-          <img id="logo" alt="logo" class="logo" src="@/assets/logo.svg" />
+          <font-awesome-icon id="sidebar-toggler" @click="$refs.sidebar.toggle()" :icon="['fas', 'bars']" size="lg"
+            v-if="$route.meta.userType === 'ADMIN'" />
+          <img @click="$router.push({ name: ($route.meta.userType === 'ADMIN') ? ('AdminHome') : ('CustomerHome') })"
+            id="logo" alt="logo" class="logo" src="@/assets/logo.svg" />
           <span
-            style="color:var(--primary-color); font-size: larger; font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;">QUANLYBANHANG</span>
+            style="color:var(--primary-color); font-size: larger; font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;">
+            QUANLYBANHANG
+          </span>
         </div>
         <div>
           <SearchBar ref="search"></SearchBar>
         </div>
         <nav-navbar>
-          <Cart @notification="createNotification" ref="cart" :t="cartTimestamp" v-if="$route.fullPath[1] === 'c'" />
-          <div class="user-menu" v-if="$route.fullPath[1] === 'c'">
+          <div class="user-menu" v-if="($route.meta.userType === 'CUSTOMER') && currentUserC">
+            <div class="menu-label">
+              <img class="user-avatar" :src="origin + '/bill.jpg'" alt="">
+              <router-link class="user-text" :to="{ name: 'CustomerOrdersList' }"
+                v-if="$route.meta.userType === 'CUSTOMER'">My
+                Orders</router-link>
+            </div>
+          </div>
+          <Cart @notification="createNotification" ref="cart" :t="cartTimestamp"
+            v-if="$route.meta.userType === 'CUSTOMER'" />
+          <div class="user-menu" v-if="$route.meta.userType === 'CUSTOMER'">
             <div class="menu-label">
               <img class="user-avatar" :src="userCAvatar" alt="">
               <a href="#" class="user-text" v-if="!currentUserC">Signin/Signup</a>
@@ -128,24 +150,24 @@ export default {
             </div>
             <ul class="menu-select" v-if="!currentUserC">
               <li>
-                <RouterLink to="/c/signin">Signin</RouterLink>
+                <router-link :to="{ name: 'CustomerSignin' }">Signin</router-link>
               </li>
               <li>
-                <RouterLink to="/c/signup">Signup</RouterLink>
+                <router-link :to="{ name: 'CustomerSignup' }">Signup</router-link>
               </li>
             </ul>
             <ul class="menu-select" v-else>
               <li>
-                <RouterLink to="/settings">
+                <router-link to="/settings">
                   <div>Settings</div>
-                </RouterLink>
+                </router-link>
               </li>
               <li @click="logOutC">
                 Sign Out
               </li>
             </ul>
           </div>
-          <div class="user-menu" v-if="$route.fullPath[1] === 'm'">
+          <div class="user-menu" v-if="$route.meta.userType === 'ADMIN'">
             <div class="menu-label">
               <img class="user-avatar" :src="userEAvatar" alt="">
               <a href="#" class="user-text" v-if="!currentUserE">Signin/Signup</a>
@@ -153,17 +175,17 @@ export default {
             </div>
             <ul class="menu-select" v-if="!currentUserE">
               <li>
-                <RouterLink to="/m/signin">Signin</RouterLink>
+                <router-link :to="{ name: 'AdminSignin' }">Signin</router-link>
               </li>
               <li>
-                <RouterLink to="/m/signup">Signup</RouterLink>
+                <router-link :to="{ name: 'AdminSignup' }">Signup</router-link>
               </li>
             </ul>
             <ul class="menu-select" v-else>
               <li>
-                <RouterLink to="/settings">
+                <router-link to="/settings">
                   <div>Settings</div>
-                </RouterLink>
+                </router-link>
               </li>
               <li @click="logOutE">
                 Sign Out
@@ -173,7 +195,7 @@ export default {
         </nav-navbar>
       </div>
       <div id="body">
-        <Sidebar ref="sidebar" @opened="shrinkContent" @closed="expandContent" :routes="routerRoutes"></Sidebar>
+        <Sidebar ref="sidebar" @opened="shrinkContent" @closed="expandContent" v-if="$route.meta.userType === 'ADMIN'" />
         <div id="content" ref="content">
           <Suspense>
             <RouterView @checkAuth="checkAuth" @updateAuthentication="updateAuthentication"
@@ -225,8 +247,16 @@ export default {
 
   /* Scale the background image to be as large as possible */
   background-size: cover;
-  background-image: url(@/../background.jpg);
   border-radius: 8px;
+  transition: background-image 3s ease;
+}
+
+#appWrapper.customer-background {
+  background-image: url(@/../customerbackground.jpg);
+}
+
+#appWrapper.admin-background {
+  background-image: url(@/../adminbackground.jfif);
 }
 
 #header,
@@ -369,8 +399,6 @@ export default {
         height: auto;
         margin: 0;
         padding: 0;
-        /* display: flex;
-        flex-direction: column; */
         display: none;
         list-style: none;
         position: absolute;
@@ -410,30 +438,30 @@ export default {
 }
 
 #body {
-  display: flex;
-  justify-items: stretch;
+  display: block;
   overflow: hidden;
+  box-sizing: border-box;
+  width: 100%;
 
   background-color: transparent;
   min-height: calc(100vh - var(--header-height) - var(--footer-height) - 48px);
 }
 
+#body:has(#sidebar) {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+}
+
 #content {
-  flex-shrink: 0;
+  flex-grow: 1;
   background-color: #ffffff77;
   backdrop-filter: blur(10px);
-  width: calc(100% - var(--sidebar-icon-width) - 8px);
+  width: auto;
   transition: width 2s ease-out;
-
-  &>*:first-child {
-    min-height: 100%;
-    box-sizing: border-box;
-  }
+  min-height: calc(100vh - var(--header-height) - var(--footer-height) - 48px);
 }
 
-#content.sidebar-opened {
-  width: calc(100% - var(--sidebar-width) - 8px);
-}
 
 #footer {
   height: var(--footer-height);
@@ -451,7 +479,7 @@ export default {
 .logo {
   width: var(--icon-width);
   height: var(--icon-width);
-  margin: 0;
+  margin: 0 0 0 1rem;
   max-height: calc(var(--header-height) - 8px);
 }
 

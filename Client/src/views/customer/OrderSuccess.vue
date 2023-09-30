@@ -17,7 +17,7 @@ export default {
         <div class="content">
           <img :src="origin + '/success.gif'" alt="">
           <h1>Ordered Successfully</h1>
-          <button @click="$router.push({ name: 'c' })" class="block">RETURN TO HOME</button>
+          <button @click="$router.push({ name: 'CustomerHome' })" class="block">RETURN TO HOME</button>
         </div>
       </div>
     </Teleport>

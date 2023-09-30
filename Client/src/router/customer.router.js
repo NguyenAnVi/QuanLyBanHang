@@ -1,53 +1,72 @@
 export default [
   {
-    path: '/c',
-    name: 'c',
-    meta: {
-      title: 'Customer Home',
-      sidebarIcon: 'house',
-      showInSidebar: 'c',
-    },
-    component: () => import('@/views/customer/HomeView.vue')
-  },
-  {
-    path: '/c/signin',
-    name: 'c.signin',
-    meta: {
-      title: 'Customer Signin',
-    },
-    component: () => import('@/views/customer/authentication/Signin.vue')
-  },
-  {
-    path: '/c/signup',
-    name: 'c.signup',
-    meta: {
-      title: 'Customer Signup',
-    },
-    component: () => import('@/views/customer/authentication/Signup.vue')
-  },
-  {
-    path: '/c/product/:id',
-    name: 'c.product',
-    meta: {
-      title: 'Product',
-    },
-    component: () => import('@/views/customer/Product.vue')
-  },
-  {
-    path: '/c/checkout',
-    name: 'c.checkout',
-    meta: {
-      title: 'Checkout',
-      requiresAuth: true
-    },
-    component: () => import('@/views/customer/Checkout.vue')
-  },
-  {
-    path: '/c/order/success',
-    name: 'c.order.success',
-    meta: {
-      title: 'Order success',
-    },
-    component: () => import('@/views/customer/OrderSuccess.vue')
-  },
+    path: '/',
+    children: [
+      {
+        path: '',
+        name: 'CustomerHome',
+        meta: {
+          title: 'Customer Home',
+          userType: 'CUSTOMER'
+        },
+        component: () => import('@/views/customer/HomeView.vue'),
+
+      },
+      {
+        path: 'signin',
+        name: 'CustomerSignin',
+        meta: {
+          title: 'Customer Signin',
+          userType: 'CUSTOMER'
+        },
+        component: () => import('@/views/customer/authentication/Signin.vue')
+      },
+      {
+        path: 'signup',
+        name: 'CustomerSignup',
+        meta: {
+          title: 'Customer Signup',
+          userType: 'CUSTOMER'
+        },
+        component: () => import('@/views/customer/authentication/Signup.vue')
+      },
+      {
+        path: 'product/:id',
+        name: 'CustomerProductDetail',
+        meta: {
+          title: 'Product',
+          userType: 'CUSTOMER'
+        },
+        component: () => import('@/views/customer/Product.vue')
+      },
+      {
+        path: 'checkout',
+        name: 'CustomerCheckout',
+        meta: {
+          title: 'Checkout',
+          requiresAuth: true,
+          userType: 'CUSTOMER'
+        },
+        component: () => import('@/views/customer/Checkout.vue')
+      },
+      {
+        path: 'order/success',
+        name: 'CustomerOrderSuccess',
+        meta: {
+          title: 'Order success',
+          userType: 'CUSTOMER'
+        },
+        component: () => import('@/views/customer/OrderSuccess.vue')
+      },
+      {
+        path: 'order/list',
+        name: 'CustomerOrdersList',
+        meta: {
+          title: 'My Orders',
+          userType: 'CUSTOMER'
+        },
+        component: () => import('@/views/customer/OrdersList.vue')
+      },
+    ]
+  }
 ]

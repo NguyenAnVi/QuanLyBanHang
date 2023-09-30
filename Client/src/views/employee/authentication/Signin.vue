@@ -1,9 +1,6 @@
 <script>
 import * as yup from "yup";
-import { useToast } from 'vue-toastification';
 import { Form, Field, ErrorMessage } from "vee-validate";
-
-const toast = useToast();
 
 export default {
 
@@ -37,7 +34,7 @@ export default {
         type: "info"
       })
       this.$emit('updateAuthentication');
-      this.$router.push(this.$route.query.redirect || "/m")
+      this.$router.push(this.$route.query.redirect || { name: 'AdminHome' })
     }
   },
   methods: {
@@ -47,7 +44,7 @@ export default {
       this.$store.dispatch("userE/login", user).then(
         () => {
           this.$emit('updateAuthentication');
-          this.$router.push(this.$route.query.redirect || "/m");
+          this.$router.push(this.$route.query.redirect || { name: 'AdminHome' });
         },
         (error) => {
           this.loading = false;

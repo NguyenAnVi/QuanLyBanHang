@@ -1,9 +1,6 @@
 <script>
 import * as yup from "yup";
-import { useToast } from 'vue-toastification';
 import { Form, Field, ErrorMessage } from "vee-validate";
-
-const toast = useToast();
 
 export default {
   name: "SigninFormForCustomer",
@@ -58,7 +55,7 @@ export default {
               error.response.data.message) ||
             error.message ||
             error.toString();
-          toast(error.response?.data.message || error.message, { type: "error" });
+          this.$emit('notification', { message: error.response?.data.message || error.message, type: "error" });
         }
       );
     },
@@ -113,6 +110,7 @@ export default {
   gap: 16px;
   align-items: center;
   justify-content: center;
+  padding-top: 8%;
 
   @media only screen and (max-width: 720px) {
     & {
@@ -126,6 +124,7 @@ Form {
   box-sizing: border-box;
   background-color: beige;
   border-radius: 16px;
+  margin-bottom: 24px;
 }
 
 .title {

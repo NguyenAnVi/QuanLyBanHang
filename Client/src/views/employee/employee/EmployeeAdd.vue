@@ -1,6 +1,5 @@
 <script>
 import * as yup from "yup";
-import { useToast } from "vue-toastification";
 import { ref } from "vue";
 import { Form, Field, ErrorMessage } from "vee-validate";
 
@@ -16,7 +15,6 @@ import { library } from '@fortawesome/fontawesome-svg-core';
 import { faCloudArrowUp } from '@fortawesome/free-solid-svg-icons';
 library.add(faCloudArrowUp);
 
-const toast = useToast();
 
 export default {
   components: {
@@ -74,8 +72,7 @@ export default {
       await this.$store.dispatch("product/add", product)
         .then((res) => {
           this.isProcessing = false;
-          // this.$router.push('/m/product');
-          toast(res.message, { type: "success" });
+          // toast(res.message, { type: "success" });
         })
         .catch((error) => {
           this.isProcessing = false;
@@ -85,7 +82,7 @@ export default {
               error.response?.data.message) ||
             error.message ||
             error.toString();
-          toast(error.response?.data.message || error.message, { type: "error" });
+          // toast(error.response?.data.message || error.message, { type: "error" });
         }
         );
       this.isProcessing = false;

@@ -1,6 +1,6 @@
 import express from "express"
 import { signin, signup, updateProfile, saveCart, updateAvatar } from "../controllers/auth/customer.controller.js";
-import { placeOrder } from "../controllers/customer/order.controller.js";
+import { getOrders, getOrder, placeOrder } from "../controllers/customer/order.controller.js";
 import {
   get as getProduct,
   getRecommendedProducts
@@ -17,5 +17,7 @@ export default () => {
   router.post("/updateprofile", loginRequired, updateProfile)
   // router.post("/updateavatar", loginRequired, updateAvatar);
   router.post("/order/placeorder", loginRequired, placeOrder)
+  router.get("/order/getorders", loginRequired, getOrders)
+  router.get("/order/getorder/:id", loginRequired, getOrder)
   return router
 };

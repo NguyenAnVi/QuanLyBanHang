@@ -1,6 +1,5 @@
 <script>
 import * as yup from "yup";
-import { RouterLink } from 'vue-router';
 import { Form, Field, ErrorMessage } from 'vee-validate';
 import InputTypeNumber from '@/components/InputTypeNumber.vue';
 import InputTypeSelect from '@/components/InputTypeSelect.vue';
@@ -11,7 +10,6 @@ export default {
     Form,
     Field,
     ErrorMessage,
-    RouterLink,
     InputTypeNumber,
     InputTypeSelect
   },
@@ -73,7 +71,7 @@ export default {
             type: "success"
           })
           this.$store.dispatch('cart/removeAllCartItems')
-          this.$router.push({ name: "c.order.success" })
+          this.$router.push({ name: "CustomerOrderSuccess" })
         })
         .catch(err => {
           this.$emit('notification', {

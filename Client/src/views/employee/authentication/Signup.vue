@@ -1,9 +1,7 @@
 <script>
 import * as yup from "yup";
-import { useToast } from "vue-toastification";
 import { Form, Field, ErrorMessage } from "vee-validate";
 
-const toast = useToast();
 
 export default {
   name: "SignupFormForEmployee",
@@ -58,7 +56,7 @@ export default {
         type: "info"
       })
       this.$emit('updateAuthentication');
-      this.$router.push(this.$route.query.redirect || "/m/signin")
+      this.$router.push(this.$route.query.redirect || { name: "AdminSignin" })
     }
   },
   methods: {
@@ -76,7 +74,7 @@ export default {
             message: "Account created",
             type: "success"
           })
-          this.$router.push("/m/signin");
+          this.$router.push({ name: "AdminSignin" });
         },
         (error) => {
           this.message =
@@ -85,7 +83,7 @@ export default {
               error.response.data.message) ||
             error.message ||
             error.toString();
-          toast(error.response?.data.message || error.message, { type: "error" });
+          this.$emit('notification', { message: error.response?.data.message || error.message, type: "error" });
           this.successful = false;
           this.loading = false;
         }

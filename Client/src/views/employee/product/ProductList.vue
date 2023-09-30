@@ -1,11 +1,9 @@
 <script>
 import ProductListItem from '@/components/ProductListItem.vue';
-import { RouterLink } from "vue-router";
 import ConfirmDialog from '@/components/ConfirmDialog.vue';
 export default {
   name: "ProductList",
   components: {
-    RouterLink,
     ProductListItem,
     ConfirmDialog
   },
@@ -24,7 +22,7 @@ export default {
   },
   methods: {
     editProductHandler(id) {
-      this.$router.push({ name: "m.product.edit", params: { id: id } })
+      this.$router.push({ name: "AdminProductEdit", params: { id: id } })
     },
     deleteProductHandler(id) {
       this.$refs.confirmDialog.show('Are you sure you want to delete this product?', { id, handler: "deleteproduct" });
@@ -71,7 +69,7 @@ export default {
         <ProductListItem @edit="editProductHandler" @delete="deleteProductHandler" v-for="productItem in productItems"
           :key="productItem.id" :productItem="productItem" />
       </div>
-      <RouterLink to="/m/product/add"><button class="block">➕ Add new product</button></RouterLink>
+      <router-link :to="{ name: 'AdminProductAdd' }"><button class="block">➕ Add new product</button></router-link>
     </div>
     <ConfirmDialog title="Confirm delete product" ref="confirmDialog" @confirmed="dialogHandler" :countdown="4">
     </ConfirmDialog>

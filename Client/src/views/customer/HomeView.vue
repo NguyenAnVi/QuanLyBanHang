@@ -1,12 +1,10 @@
 <script>
 import Pills from '@/components/pills.vue';
-import { RouterLink } from 'vue-router';
 
 export default {
   name: "HomeView",
   components: {
     Pills,
-    RouterLink
   },
   data() {
     return {
@@ -24,7 +22,7 @@ export default {
     },
     clickProduct($event) {
       const pid = $event.currentTarget.getAttribute('data-pid');
-      this.$router.push({ name: "c.product", params: { id: pid } })
+      this.$router.push({ name: "CustomerProductDetail", params: { id: pid } })
     },
     toPrice(value) {
       return value.toLocaleString('vi', { style: 'currency', currency: 'VND' });
@@ -86,6 +84,8 @@ main {
   gap: 8px;
   display: flex;
   flex-direction: column;
+  width: inherit;
+  box-sizing: border-box;
 }
 
 main>* {
@@ -94,6 +94,7 @@ main>* {
 
 .section {
   background-color: transparent;
+
 }
 
 .section-title {

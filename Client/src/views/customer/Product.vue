@@ -1,14 +1,12 @@
 <script>
 import Pills from '@/components/pills.vue';
 import Gallery from '@/components/Gallery.vue';
-import { RouterLink } from 'vue-router';
 import InputTypeNumber from '@/components/InputTypeNumber.vue';
 
 export default {
   name: "ProductDetailCustomer",
   components: {
     Pills,
-    RouterLink,
     Gallery,
     InputTypeNumber
   },

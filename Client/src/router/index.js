@@ -4,10 +4,6 @@ import EmployeeRouter from "./employee.router"
 import NotFound from '@/views/NotFound.vue';
 
 export const routes = [
-  {
-    path: "/",
-    redirect: "/c",
-  },
   ...CustomerRouter,
   ...EmployeeRouter,
   {

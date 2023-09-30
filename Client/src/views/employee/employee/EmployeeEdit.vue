@@ -51,7 +51,7 @@ export default {
       )
       .catch(
         error => {
-          toast(error || error.message, { type: "error" });
+          this.$emit('notification', { message: error || error.message, type: "error" });
           p.roduct = {
             _id: "",
             name: "",
@@ -77,7 +77,7 @@ export default {
       )
       .catch(
         error => {
-          toast(error || error.message, { type: "error" });
+          this.$emit('notification', { message: error || error.message, type: "error" });
           p.oldimages = [];
         }
       );
@@ -143,7 +143,7 @@ export default {
               error.response?.data.message) ||
             error.message ||
             error.toString();
-          toast(error.response?.data.message || error.message, { type: "error" });
+          this.$emit('notification', { message: error.response?.data.message || error.message, type: "error" });
         }
         );
       this.isProcessing = false;
@@ -183,7 +183,7 @@ export default {
               error.response?.data.message) ||
             error.message ||
             error.toString();
-          toast(error.response?.data.message || error.message, { type: "error" });
+          this.$emit('notification', { message: error.response?.data.message || error.message, type: "error" });
         });
     }
   },

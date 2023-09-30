@@ -1,11 +1,9 @@
 <script>
 import ProductListItem from '@/components/ProductListItem.vue';
-import { RouterLink } from "vue-router";
 import ConfirmDialog from '@/components/ConfirmDialog.vue';
 export default {
   name: "ProductList",
   components: {
-    RouterLink,
     ProductListItem,
     ConfirmDialog
   },
@@ -57,12 +55,6 @@ export default {
       return JSON.parse(JSON.stringify(this.$store.getters['product/productItems']));
     }
   },
-  created() {
-    if (!this.loggedIn)
-      this.$router.push('/m/signin')
-    else
-      this.$store.dispatch('product/getProductItems');
-  }
 };
 </script>
 <template>
@@ -74,7 +66,7 @@ export default {
         <ProductListItem @edit="editProductHandler" @delete="deleteProductHandler" v-for="productItem in productItems"
           :key="productItem.id" :productItem="productItem" />
       </div>
-      <RouterLink to="/m/product/add"><button class="block">➕ Add new product</button></RouterLink>
+      <router-link :to="{ name: 'AdminProductAdd' }"><button class="block">➕ Add new product</button></router-link>
     </div>
     <ConfirmDialog title="Confirm delete product" ref="confirmDialog" @confirmed="dialogHandler" :countdown="4">
     </ConfirmDialog>

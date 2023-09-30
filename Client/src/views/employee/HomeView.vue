@@ -38,18 +38,20 @@ export default {
     }
   },
   async mounted() {
-    this.newProductCount = this.$store.dispatch('util/newProductCount')
-      .then((res) => {
-        this.newProductCount = res;
-      });
-    this.newUserCount = this.$store.dispatch('util/newUserCount')
-      .then((res) => {
-        this.newUserCount = res;
-      });
-    this.newOrderCount = this.$store.dispatch('util/newOrderCount')
-      .then((res) => {
-        this.newOrderCount = res;
-      });
+    if (this.currentUser) {
+      this.newProductCount = this.$store.dispatch('util/newProductCount')
+        .then((res) => {
+          this.newProductCount = res;
+        });
+      this.newUserCount = this.$store.dispatch('util/newUserCount')
+        .then((res) => {
+          this.newUserCount = res;
+        });
+      this.newOrderCount = this.$store.dispatch('util/newOrderCount')
+        .then((res) => {
+          this.newOrderCount = res;
+        });
+    }
   }
 }
 </script>
@@ -75,12 +77,9 @@ export default {
       <div class="shor"> <!-- shortcuts -->
         <h2>Start</h2>
         <div class="links">
-          <router-link :to="{ name: 'm.product' }">
+          <router-link :to="{ name: 'AdminProductsList' }">
             <span>Products</span>
           </router-link>
-          <!-- <router-link :to="{ name: 'm.user' }">
-            <span>Users</span>
-          </router-link> -->
         </div>
       </div>
     </div>

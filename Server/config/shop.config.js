@@ -6,8 +6,9 @@ const AvailableEmployeeDuties = [
   'ADMIN'
 ]
 const AvailableOrderStatus = [
-  'NEW',
-  'INPROGESS',
+  'TO_PAY',
+  'TO_SHIP',
+  'TO_RECEIVE',
   'COMPLETED',
   'CANCELLED'
 ]

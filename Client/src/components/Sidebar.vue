@@ -4,8 +4,21 @@ export default {
   components: {
     NavSidebar: 'nav-sidebar'
   },
-  props: {
-    routes: Object,
+  data() {
+    let routerRoutes = this.$router.options.routes;
+    let routes = [];
+    routerRoutes.forEach((r, i) => {
+      if (r.children) {
+        r.children.forEach((rc, ic) => {
+          let nrc = rc;
+          nrc.path = (r.path + "/" + rc.path).replace('//', '/');
+          routes.push(nrc);
+        })
+      }
+    })
+    return {
+      routes,
+    }
   },
   methods: {
     expand() {
@@ -31,11 +44,10 @@ export default {
 <template>
   <div id="sidebar" ref="sidebarContainer">
     <nav-sidebar>
-      <!-- {{ routerRoutes }} -->
-      <RouterLink v-for="route in routes" v-show="route.meta?.showInSidebar === $route.fullPath[1]" :to="route.path">
+      <router-link v-for="route in routes" v-show="route.meta?.showInSidebar === $route.meta.userType" :to="route.path">
         <font-awesome-icon v-if="route.meta?.sidebarIcon" :icon="route.meta?.sidebarIcon" />
         <div>{{ route.meta?.title }}</div>
-      </RouterLink>
+      </router-link>
     </nav-sidebar>
   </div>
 </template>

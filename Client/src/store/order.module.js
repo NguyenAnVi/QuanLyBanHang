@@ -12,5 +12,12 @@ export const order = {
         }).catch((err) => reject(err));
       })
     },
+    getorderlist({ }, query) {
+      return new Promise((resolve, reject) => {
+        apiService.getOrderList(query).then((response) => {
+          resolve(response.data)
+        }).catch((err) => reject(err));
+      })
+    },
   },
 };

@@ -30,7 +30,7 @@ export default {
     },
     checkOutHandler() {
       this.showModal = false;
-      this.$router.push({ name: "c.checkout" })
+      this.$router.push({ name: "CustomerCheckout" })
     },
     toPrice(v = 0) {
       const result = parseInt(v).toLocaleString('vi', { style: 'currency', currency: 'VND' });
