@@ -1,18 +1,38 @@
 <script>
 export default {
   props: {
-    show: Boolean,
     width: {
       type: String,
       default: "300px",
     }
   },
+  data() {
+    return {
+      showState: false,
+    }
+  },
+  methods: {
+    show() {
+      this.showState = true;
+    },
+    hide() {
+      this.showState = false;
+    },
+    toggle() {
+      this.showState = !this.showState;
+    }
+  },
+  watch: {
+    show(foo) {
+      this.showState = foo;
+    }
+  }
 }
 </script>
 
 <template>
   <Transition name="modal">
-    <div v-if="show" class="modal-mask" @click.self="$emit('close')">
+    <div v-if="showState" class="modal-mask" @click.self="$emit('close')">
       <div :style="{ width }" class="modal-container">
         <div class="modal-header">
           <slot name="header">Untitled</slot>
@@ -24,7 +44,7 @@ export default {
 
         <div class="modal-footer">
           <slot name="footer">
-            <button class="modal-default-button" @click="$emit('close')">OK</button>
+            <button class="modal-default-button" @click="hide">OK</button>
           </slot>
         </div>
       </div>

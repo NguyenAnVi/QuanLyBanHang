@@ -1,7 +1,7 @@
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faBasketShopping, faPersonChalkboard } from '@fortawesome/free-solid-svg-icons';
+import { faBasketShopping, faPersonChalkboard, faReceipt } from '@fortawesome/free-solid-svg-icons';
 
-library.add(faBasketShopping, faPersonChalkboard)
+library.add(faBasketShopping, faPersonChalkboard, faReceipt)
 
 export default [
   {
@@ -100,6 +100,18 @@ export default [
           userType: 'ADMIN'
         },
         component: () => import('@/views/employee/employee/EmployeeEdit.vue')
+      },
+      {
+        path: 'order',
+        name: 'AdminOrdersList',
+        meta: {
+          title: 'Order management',
+          sidebarIcon: 'receipt',
+          showInSidebar: 'ADMIN',
+          requiresAuth: true,
+          userType: 'ADMIN'
+        },
+        component: () => import('@/views/employee/order/OrderList.vue')
       },
     ]
   }

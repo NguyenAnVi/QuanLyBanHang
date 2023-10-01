@@ -197,6 +197,25 @@ class ApiService {
         });
     })
   }
+  async getOrderListAdmin(query) {
+    return new Promise(async (resolve, reject) => {
+      await axios
+        .get(API_URL + '/c/order/getorders',
+          {
+            headers: { ...authHeaderE() },
+            params: { filter: query },
+          },
+        )
+        .then(response => {
+          const data = response;
+          resolve(data)
+        })
+        .catch(error => {
+          console.log(error);
+          reject(error);
+        });
+    })
+  }
 }
 
 export default new ApiService();

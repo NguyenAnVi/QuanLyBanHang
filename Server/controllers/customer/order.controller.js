@@ -30,11 +30,12 @@ export const placeOrder = async function (req, res) {
 }
 export const getOrders = async function (req, res) {
   try {
-    const uid = req.user._id;
-    const filter = req.query.filter;
-    var data = [];
+    let filter = {
+      ...req.query.filter
+    };
+    if (req.userType !== 'EMPLOYEE')
+      filter.customerId = req.user._id;
     let result = await OrderModel.find({
-      customerId: uid,
       ...filter
     })
     if (result) {

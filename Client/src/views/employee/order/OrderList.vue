@@ -1,140 +1,153 @@
 <script>
+import { ref } from 'vue';
+import InputTypeDate from '@/components/InputTypeDate.vue';
 import Modal from '@/components/Modal.vue';
 import { OrderStatus } from '@/config/index.config';
-import { ref } from 'vue';
 
 export default {
-  name: "OrderListCustomer",
+  name: "OrderList",
   components: {
-    Modal
+    Modal,
+    InputTypeDate
   },
   data() {
-
     return {
       origin: location.origin,
-      listQueries: [],
-      currentOrdersList: [],
-      currentOrderDetail: {},
-      showModal: false
+      OrderStatus,
+      orderStatus: [],
+      filters: {},
+      orders: [],
+      mongoObjectIdRegExp: '^([0-9a-fA-F]){24}$',
+      currentOrderDetail: {}
     }
   },
   methods: {
-    async getTab(e) {
-      let tabName = ""
-      switch (typeof (e)) {
-        case 'object':
-          const siblings = e.target.parentNode.querySelectorAll(e.target.localName)
-          siblings.forEach(element => {
-            element.classList.remove('active');
-          });
-          e.target.classList.add('active');
-          tabName = (e.target.getAttribute('data-tab'));
-          break;
-
-        case 'string':
-          tabName = (e).toLowerCase();
-          break;
-      }
-      const desiredTab = this.listQueries.find(item => (item.name == tabName));
-      await this.$store.dispatch('order/getorderlist', desiredTab.query)
-        .then((res) => {
-          this.currentOrdersList = (res.data);
-        })
-        .catch(err => {
-          this.$emit('notification', {
-            message: err.message,
-            type: 'error'
-          })
-        })
-
-    },
     getDetail(e) {
-      this.currentOrderDetail = (this.currentOrdersList[e.currentTarget.getAttribute('data-index')]);
-      this.$refs.detailModal.show()
+      this.currentOrderDetail = (this.orders[e.currentTarget.getAttribute('data-index')]);
+      this.$refs.detailModal.show();
     },
-    toLabelStatus(str) {
-      return this.listQueries.find(el => (el.query.status === str)).status
+    showModalHandler() {
+      this.showModal = true;
+    },
+    hideModalHandler() {
+      this.showModal = false;
     },
     toPrice(value = "") {
       return value.toLocaleString('vi', { style: 'currency', currency: 'VND' });
     },
+    addFilter(filter) {
+      this.filters = {
+        ...this.filters,
+        ...filter
+      }
+    },
+    orderStatusFilter(e) {
+      const siblings = e.target.parentNode.querySelectorAll(e.target.localName)
+      siblings.forEach(element => {
+        element.classList.remove('active');
+      });
+      e.target.classList.add('active');
 
+      const q = JSON.parse(e.target.getAttribute('data-query'));
+      this.addFilter({ status: q.status });
+    },
+    inputCustomerId(e) {
+      if (e.target.checkValidity()) {
+        this.addFilter({ customerId: (e.target.value !== "") ? e.target.value : undefined })
+      } else {
+        this.addFilter({ customerId: undefined })
+      }
+    },
+    inputTypeDateChangeHandler(d) {
+      if (d == "Invalid Date") {
+        this.addFilter({ createdAt: undefined })
+      } else {
+        this.addFilter({
+          createdAt: {
+            $gt: d
+          }
+        })
+      }
+    }
+  },
+  computed: {
+    productItems() {
+      return JSON.parse(JSON.stringify(this.$store.getters['product/productItems']));
+    }
+  },
+  watch: {
+    async filters(newVal) {
+      this.orders = [];
+      this.$store.dispatch('order/getorderlistadmin', newVal)
+        .then(res => {
+          console.log(res);
+          this.orders = res.data
+        });
+    }
   },
   created() {
-    this.listQueries = ref([]);
+    this.orderStatus = ref([]);
     Object.keys(OrderStatus).forEach((os, index) => {
-      this.listQueries.push(OrderStatus[os])
+      this.orderStatus.push(OrderStatus[os])
     });
   }
-}
+};
 </script>
-
 <template>
-  <main>
-    <div>
-      <div class="section header" v-once>
-        <div class="form-group">
-          <h2 style="display: block; width: 100%; padding: 8px;">{{ $route.meta.title }}</h2>
-        </div>
+  <main class="container">
+    <h3>{{ $route.meta.title }}</h3>
+    <div class="is-ancestor">
+      <div class="filters">
       </div>
-      <div class="section tabs-wrapper" v-once>
-        <div class="form-group tabs">
-          <button v-for="item in listQueries" @click="getTab" class="tab" :data-tab="item.name">{{ item.label }}</button>
-        </div>
+      <div class="filters">
+        <InputTypeDate @changed="inputTypeDateChangeHandler" />
+        <div class="filter-item" @click="orderStatusFilter" v-for="item in orderStatus"
+          :data-query="JSON.stringify(item.query)">{{
+            item.label }}</div>
+        <input placeholder="Type Customer's Id or Name..." type="text" class="filter-item suggest"
+          @change="inputCustomerId" :pattern="mongoObjectIdRegExp" autocomplete="name" />
+        <div class="suggest" ref="suggestUser"></div>
       </div>
-      <div class="section" v-for="(item, index) in currentOrdersList">
-        <div class="order-card header">
-          <span> {{ toLabelStatus(item.status) }}</span>
-          <hr class="vertical-divider">
-          <span style="color: red;">{{ item.status }}</span>
-        </div>
-        <div class="order-card body">
-          <div class="order-items">
-            <div class="order-item">
-              <div>
-                <span>
-                  {{ item.list[0].productName }}
-                </span>
-                <span style="font-size: 0.9em; color: gray;">
-                  x{{ item.list[0].quantity }}
-                </span>
-              </div>
-              <div>
-                {{ toPrice(item.list[0].orderPrice) }}
-              </div>
+      <transition name="fade" mode="out-in">
+        <div class="is-parent" v-if="orders.length > 0">
+          <div class="card header">
+            <div class="cell shrink">
+              ID
             </div>
-            <div class="order-item" v-if="item.list.length > 1">
-              <div>
-                <i style="color: gray;">
-                  +{{ item.list.length - 1 }} more
-                </i>
-              </div>
-              <div>
-              </div>
+            <div class="cell shrink">
+              <p>Status</p>
+            </div>
+            <div class="cell">
+              <strong>Total</strong>
+            </div>
+            <div class="cell shrink">
+              Ordered At
+            </div>
+          </div>
+          <div class="card" v-for="(item, index) in orders" @click="getDetail" :data-index="index">
+            <div class="cell">
+              <p>{{ item._id }}</p>
+            </div>
+            <div class="cell shrink">
+              <p>{{ OrderStatus[item.status].label }}</p>
+            </div>
+            <div class="cell shrink">
+              <strong>{{ toPrice(item.subTotal + item.shippingFee) }}</strong>
+            </div>
+            <div class="cell shrink">
+              <p>{{ item.createdAt }}</p>
             </div>
           </div>
         </div>
-        <div class="order-card footer">
-          <div style="text-align: right ;">
-            <span>Order Total:</span>
-            <span style="margin-left:1rem; font-size: 1.5em; color: red; font-weight: 550;">
-              {{ toPrice(item.subTotal + item.shippingFee) }}
-            </span>
-          </div>
-          <div style="margin-block: 1rem;">
-            <button style="min-width: 10rem;" @click="">Buy Again</button>
-            <button style="min-width: 10rem;" @click="">Contact Seller</button>
-            <button style="min-width: 10rem;" @click="getDetail" :data-index="index">Detail</button>
+        <div style="background-color: #ededed; margin:4px; display: table-cell;box-sizing: border-box;border-radius: 4px;"
+          v-else>
+          <img :src="origin + '/noorders.png'" alt=""
+            style=" margin-top:2rem;width: 200px; aspect-ratio: 4/3; margin-left: auto;margin-right: auto; display: block;"
+            v-once>
+          <h4 style="text-align: center;">No orders yet</h4>
+        </div>
+      </transition>
 
-          </div>
-        </div>
-      </div>
-      <div class="section" v-if="currentOrdersList.length <= 0">
-        <img :src="origin + '/noorders.png'" alt=""
-          style=" margin-top:2rem;width: 200px; aspect-ratio: 4/3; margin-left: auto;margin-right: auto; display: block;"
-          v-once>
-        <h4 style="text-align: center;">No orders yet</h4>
-      </div>
     </div>
     <Teleport to="body">
       <Modal width="800px" ref="detailModal">
@@ -219,46 +232,132 @@ export default {
     </Teleport>
   </main>
 </template>
-
 <style scoped>
-main {
+.container {
   display: flex;
-  flex-wrap: nowrap;
   flex-direction: column;
-  justify-content: stretch;
-  align-items: stretch;
-  max-width: 800px;
-  margin-left: auto;
-  margin-right: auto;
+  margin: 0;
+  width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+  background-color: transparent;
+
+  &>div,
+  &>h3 {
+    padding-inline: 16px;
+  }
 }
 
-main>* {
-  padding: 8px;
-}
-
-.tabs {
+.is-ancestor {
+  background-color: transparent;
+  padding: 0;
+  box-sizing: border-box;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+}
+
+.filters {
+  display: flex;
   flex-direction: row;
-  flex-wrap: nowrap !important;
+  flex-wrap: wrap;
+  align-items: center;
   overflow-x: auto;
   overflow-y: hidden;
 }
 
-button.tab {
-  flex: 1 0 auto;
-  width: auto !important;
-  margin: 0;
-  text-wrap: nowrap;
-  transform: translateY(10%);
+.filter-item {
+  display: block;
+  background-color: white;
+  padding: 8px 16px;
+  border: none;
+  margin: 4px;
+  border-radius: 25px;
+  box-sizing: border-box;
+  transition: all .2s ease;
+  cursor: pointer;
+
+  &:hover,
+  &:focus,
+  &:valid,
+  &.active {
+    background-color: var(--primary-color);
+    color: #fff;
+    outline: none;
+  }
 }
 
-button.tab.active {
-  z-index: 10;
-  background-color: aqua;
-  transform: scaleY(1.1) translateY(-2%);
+input.filter-item.suggest {
+  width: 30ch !important;
+
+  &:invalid {
+    background-color: rgb(198, 52, 52);
+    color: #fff;
+  }
+
+  &::placeholder {
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    color: lightgray;
+  }
 }
 
+.is-parent {
+  width: 100%;
+
+  display: table;
+  flex-wrap: wrap;
+  border-spacing: 4px;
+  gap: 8px;
+  row-gap: 8px;
+
+  &>*:nth-child(odd) {
+    background-color: #ededed;
+  }
+
+  &>*:nth-child(even) {
+    background-color: #ffffff;
+  }
+
+  .card.header {
+    text-align: center;
+    font-size: 1.1em;
+    font-weight: bold !important;
+    background-color: black;
+    color: white;
+  }
+
+  .card {
+    width: inherit;
+    flex-wrap: nowrap;
+    display: table-row;
+    overflow: hidden;
+  }
+
+
+  .cell {
+    padding-inline: 16px;
+    display: table-cell;
+    box-sizing: border-box;
+    border-radius: 4px;
+  }
+
+  .card:hover .cell {
+    background-color: rgb(189, 189, 189);
+  }
+
+  .card.header:hover .cell {
+    background-color: black !important;
+  }
+
+  [data-name] {
+    width: auto;
+  }
+
+  .cell.shrink {
+    text-align: center;
+    width: 1%;
+    white-space: nowrap;
+  }
+}
 
 .section {
   background-color: #ffffff99;
@@ -362,5 +461,15 @@ hr.vertical-divider {
   background-position-x: 0px;
   background-size: 116px 3px;
   background-image: repeating-linear-gradient(45deg, #6fa6d6, #6fa6d6 33px, transparent 0, transparent 41px, #f18d9b 0, #f18d9b 74px, transparent 0, transparent 82px);
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: all .5s
+}
+
+.fade-enter,
+.fade-leave-to {
+  opacity: 0
 }
 </style>

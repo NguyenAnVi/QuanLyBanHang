@@ -19,5 +19,12 @@ export const order = {
         }).catch((err) => reject(err));
       })
     },
+    getorderlistadmin({ }, query) {
+      return new Promise((resolve, reject) => {
+        apiService.getOrderListAdmin(query).then((response) => {
+          resolve(response.data)
+        }).catch((err) => reject(err));
+      })
+    },
   },
 };

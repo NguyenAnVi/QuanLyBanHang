@@ -31,11 +31,13 @@ export default {
     async logOutC() {
       await this.$store.dispatch('userC/logout');
       this.$store.state.userC.user = undefined;
+      this.updateAuthentication();
       this.$router.back();
     },
     async logOutE() {
       await this.$store.dispatch('userE/logout');
       this.$store.state.userE.user = undefined;
+      this.updateAuthentication();
       this.$router.back();
     },
     updateAuthentication() {

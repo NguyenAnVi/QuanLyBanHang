@@ -33,7 +33,7 @@ class AuthService {
     return axios.post(API_URL + '/m/signup', user);
   }
   registerC(user) {
-    return axios.post(API_URL + '/m/signup', user);
+    return axios.post(API_URL + '/C/signup', user);
   }
 
   logoutE() {
