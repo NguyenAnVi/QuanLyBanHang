@@ -46,7 +46,7 @@ export default {
     },
     clickProduct($event) {
       const pid = $event.currentTarget.getAttribute('data-pid');
-      this.$router.push({ name: "c.product", params: { id: pid } })
+      this.$router.push({ name: "CustomerProductDetail", params: { id: pid } })
       this.id = pid;
     },
     toPrice(value = "") {
@@ -184,6 +184,7 @@ main>* {
 
 .product-detail {
   max-width: 100%;
+  width: 1080px;
   margin: 0px;
   margin-left: auto;
   margin-right: auto;
@@ -350,7 +351,11 @@ table {
   align-items: flex-start;
   padding: 8px;
 
-  & h4 {
+  & h3 {
+    line-height: 1.2em;
+    height: 2.4em;
+    overflow: hidden;
+    text-overflow: ellipsis'...';
     margin: 0
   }
 }
