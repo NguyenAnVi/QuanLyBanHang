@@ -29,16 +29,22 @@ export default {
   },
   methods: {
     async logOutC() {
+      if (this.$route.name !== "CustomerHome")
+        this.$router.push({ name: 'CustomerHome' });
+      else
+        this.$router.push({ name: 'CustomerSignin' });
       await this.$store.dispatch('userC/logout');
       this.$store.state.userC.user = undefined;
       this.updateAuthentication();
-      this.$router.back();
     },
     async logOutE() {
+      if (this.$route.name !== "AdminHome")
+        this.$router.push({ name: 'AdminHome' });
+      else
+        this.$router.push({ name: 'AdminSignin' });
       await this.$store.dispatch('userE/logout');
       this.$store.state.userE.user = undefined;
       this.updateAuthentication();
-      this.$router.back();
     },
     updateAuthentication() {
       const defaultAvtSrc = this.origin + "/account.png";

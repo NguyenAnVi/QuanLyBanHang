@@ -10,7 +10,6 @@ export default {
   data() {
     return {
       cartItems: [],
-      showModal: false,
       origin: location.origin
     };
   },
@@ -23,13 +22,13 @@ export default {
       this.cartItems = this.$store.getters['cart/cartItems'];
     },
     showModalHandler() {
-      this.showModal = true;
+      this.$refs.cartModal.show();
     },
     hideModalHandler() {
-      this.showModal = false;
+      this.$refs.cartModal.hide();
     },
     checkOutHandler() {
-      this.showModal = false;
+      this.$refs.cartModal.hide();
       this.$router.push({ name: "CustomerCheckout" })
     },
     toPrice(v = 0) {
@@ -91,7 +90,7 @@ export default {
       <a href="#" class="text">Cart: {{ cartQuantity }}</a>
     </div>
     <Teleport to="body">
-      <CartModal width="500px" :show="showModal" @close="hideModalHandler">
+      <CartModal width="500px" ref="cartModal">
         <template #header v-once>
           <h3>Cart items</h3>
         </template>
