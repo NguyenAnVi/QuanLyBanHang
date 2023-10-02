@@ -1,6 +1,7 @@
 <script>
 import { ref } from 'vue';
 import InputTypeDate from '@/components/InputTypeDate.vue';
+import InputTypeSelect from '@/components/InputTypeSelect.vue';
 import Modal from '@/components/Modal.vue';
 import { OrderStatus } from '@/config/index.config';
 
@@ -8,17 +9,21 @@ export default {
   name: "OrderList",
   components: {
     Modal,
-    InputTypeDate
+    InputTypeDate,
+    InputTypeSelect
   },
   data() {
     return {
       origin: location.origin,
       OrderStatus,
       orderStatus: [],
+      orderStatusOption: [],
+      userSuggest: [],
       filters: {},
       orders: [],
       mongoObjectIdRegExp: '^([0-9a-fA-F]){24}$',
-      currentOrderDetail: {}
+      currentOrderDetail: {},
+      newOrderStatus: ""
     }
   },
   methods: {
@@ -51,12 +56,24 @@ export default {
       const q = JSON.parse(e.target.getAttribute('data-query'));
       this.addFilter({ status: q.status });
     },
-    inputCustomerId(e) {
+    searchCustomer(e) {
+      this.userSuggest = [];
+      if (e.target.value) {
+        this.$store.dispatch('order/searchUser', e.target.value)
+          .then(res => {
+            console.log(res);
+            this.userSuggest = res.data;
+          })
+      }
       if (e.target.checkValidity()) {
         this.addFilter({ customerId: (e.target.value !== "") ? e.target.value : undefined })
       } else {
         this.addFilter({ customerId: undefined })
       }
+    },
+    getSuggest(e) {
+      this.$refs.suggestInput.value = e.target.getAttribute('data-id');
+      this.$refs.suggestInput.dispatchEvent(new Event('input'))
     },
     inputTypeDateChangeHandler(d) {
       if (d == "Invalid Date") {
@@ -68,6 +85,28 @@ export default {
           }
         })
       }
+    },
+    saveNewOrderStatus(newVal) {
+      this.newOrderStatus = newVal.query.status
+    },
+    processOrder() {
+      this.$refs.processOrderModal.hide()
+      this.$refs.detailModal.hide()
+      this.$store.dispatch('order/processOrder', {
+        orderId: this.currentOrderDetail._id,
+        newStatus: this.newOrderStatus
+      }).then(res => {
+        this.addFilter({});
+        this.$emit('notification', {
+          message: res.message,
+          type: 'success'
+        })
+      }).catch(errres => {
+        this.$emit('notification', {
+          message: errres.response.data.message,
+          type: 'error'
+        })
+      })
     }
   },
   computed: {
@@ -77,6 +116,7 @@ export default {
   },
   watch: {
     async filters(newVal) {
+      console.log(newVal);
       this.orders = [];
       this.$store.dispatch('order/getorderlistadmin', newVal)
         .then(res => {
@@ -87,8 +127,13 @@ export default {
   },
   created() {
     this.orderStatus = ref([]);
+    this.orderStatusOption = ref([]);
     Object.keys(OrderStatus).forEach((os, index) => {
       this.orderStatus.push(OrderStatus[os])
+      this.orderStatusOption.push({
+        label: OrderStatus[os].name.toString(),
+        value: os,
+      })
     });
   }
 };
@@ -98,15 +143,20 @@ export default {
     <h3>{{ $route.meta.title }}</h3>
     <div class="is-ancestor">
       <div class="filters">
-      </div>
-      <div class="filters">
+        <div class="suggest-wrapper" ref="suggestUser">
+          <input @click="$event.target.select()" ref="suggestInput" placeholder="Type Customer's Id or Name..."
+            type="text" class="filter-item suggest" @input="searchCustomer" :pattern="mongoObjectIdRegExp" />
+          <div id="suggests">
+            <div class="suggest-item" v-for="(user, ind) in userSuggest" @click="getSuggest" :data-id="user._id">
+              {{
+                user.name }}</div>
+          </div>
+        </div>
         <InputTypeDate @changed="inputTypeDateChangeHandler" />
         <div class="filter-item" @click="orderStatusFilter" v-for="item in orderStatus"
           :data-query="JSON.stringify(item.query)">{{
             item.label }}</div>
-        <input placeholder="Type Customer's Id or Name..." type="text" class="filter-item suggest"
-          @change="inputCustomerId" :pattern="mongoObjectIdRegExp" autocomplete="name" />
-        <div class="suggest" ref="suggestUser"></div>
+
       </div>
       <transition name="fade" mode="out-in">
         <div class="is-parent" v-if="orders.length > 0">
@@ -228,6 +278,32 @@ export default {
             </div>
           </div>
         </template>
+        <template #footer>
+          <div style="display: flex; align-items: end; justify-content: flex-end;">
+            <button style="background-color: var(--primary-color); color: #fff;"
+              @click="$refs.processOrderModal.show()">Process this order</button>
+            <button @click="$refs.detailModal.hide()">OK</button>
+
+          </div>
+        </template>
+      </Modal>
+      <Modal width="400px" ref="processOrderModal">
+        <template #header>
+          <h3>Process Order</h3>
+        </template>
+        <template #body>
+          <InputTypeSelect :options="orderStatus" @changed="saveNewOrderStatus"
+            style="min-width:100% !important;margin-left: auto;margin-right:auto; box-shadow: 0 0 5px #888;">
+          </InputTypeSelect>
+        </template>
+        <template #footer>
+          <div style="display: flex; justify-content: flex-end;">
+            <button @click="processOrder" style="background-color: var(--primary-color); color:#fff">Process this
+              order</button>
+            <button @click="$refs.processOrderModal.hide()">Close</button>
+          </div>
+
+        </template>
       </Modal>
     </Teleport>
   </main>
@@ -259,10 +335,13 @@ export default {
 .filters {
   display: flex;
   flex-direction: row;
+  gap: 8px;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: flex-start;
   overflow-x: auto;
   overflow-y: hidden;
+  margin-bottom: 8px;
 }
 
 .filter-item {
@@ -270,7 +349,6 @@ export default {
   background-color: white;
   padding: 8px 16px;
   border: none;
-  margin: 4px;
   border-radius: 25px;
   box-sizing: border-box;
   transition: all .2s ease;
@@ -287,7 +365,11 @@ export default {
 }
 
 input.filter-item.suggest {
+  padding: 8px 16px;
   width: 30ch !important;
+  margin-bottom: 0 !important;
+  box-sizing: border-box;
+  user-select: all;
 
   &:invalid {
     background-color: rgb(198, 52, 52);
@@ -297,6 +379,31 @@ input.filter-item.suggest {
   &::placeholder {
     font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
     color: lightgray;
+  }
+}
+
+#suggests {
+  width: 30ch;
+  font-size: 1.1em;
+  box-sizing: border-box;
+  margin: 0 !important;
+
+  position: absolute;
+  z-index: 1000;
+  background-color: beige;
+  border-radius: 8px;
+}
+
+.suggest-item {
+  margin: 4px;
+  padding: 8px 16px !important;
+  flex-direction: column;
+  position: relative;
+  border-radius: 4px;
+
+  &:hover {
+    background-color: var(--primary-color);
+    color: #fff;
   }
 }
 
@@ -331,7 +438,6 @@ input.filter-item.suggest {
     display: table-row;
     overflow: hidden;
   }
-
 
   .cell {
     padding-inline: 16px;

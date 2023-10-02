@@ -14,6 +14,7 @@ import {
   getImages,
   deleteImage
 } from "../controllers/manage/product.controller.js"
+import { processOrder, searchUser } from "../controllers/manage/order.controller.js"
 import {
   newProductCount,
   newUserCount,
@@ -41,7 +42,8 @@ export default () => {
   router.get("/newproductcount", loginRequired, isEmployee, newProductCount);
   router.get("/newusercount", loginRequired, isEmployee, newUserCount);
   router.get("/newordercount", loginRequired, isEmployee, newOrderCount);
-
+  router.get("/order/searchuser", loginRequired, searchUser);
+  router.post("/order/process", loginRequired, processOrder);
   // router.post("/updateavatar", loginRequired, isEmployee, updateAvatar);
   return router
 }

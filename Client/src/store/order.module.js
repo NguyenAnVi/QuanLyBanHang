@@ -26,5 +26,26 @@ export const order = {
         }).catch((err) => reject(err));
       })
     },
+    searchUser({ }, query) {
+      return new Promise((resolve, reject) => {
+        apiService.searchUser(query).then((response) => {
+          resolve(response.data)
+        }).catch((err) => reject(err));
+      })
+    },
+    processOrder({ }, query) {
+      return new Promise((resolve, reject) => {
+        apiService.processOrder(query).then((response) => {
+          resolve(response.data)
+        }).catch((err) => reject(err));
+      })
+    },
+    cancelOrder({ }, query) {
+      return new Promise((resolve, reject) => {
+        apiService.cancelOrder(query).then((response) => {
+          resolve(response.data)
+        }).catch((err) => reject(err.response.data));
+      })
+    },
   },
 };

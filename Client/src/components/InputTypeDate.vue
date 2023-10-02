@@ -24,15 +24,13 @@ export default {
 <style scoped>
 input[type="date"] {
   background-color: var(--primary-color);
-  padding: 8px;
+  padding: 4px;
+  padding-left: 16px;
   font-family: "Roboto Mono", monospace;
   color: #ffffff;
-  font-size: 18px;
   border: none;
   margin: 4px;
   border-radius: 25px;
-  border-top-left-radius: 4px;
-  border-bottom-left-radius: 4px;
   box-sizing: border-box;
 }
 

@@ -12,6 +12,11 @@ const AvailableOrderStatus = [
   'COMPLETED',
   'CANCELLED'
 ]
+
+// Cancellable time (hours): After an order is placed, customer 
+// can request to cancel within this time.
+const CANCELLABLE_TIME = 24;
+
 const AvailablePaymentMethods = [
   'CASH_ON_DELIVERY'
 ]
@@ -19,5 +24,6 @@ const AvailablePaymentMethods = [
 export {
   AvailableEmployeeDuties,
   AvailableOrderStatus,
+  CANCELLABLE_TIME,
   AvailablePaymentMethods
 }

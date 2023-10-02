@@ -1,6 +1,7 @@
 import OrderModel from "../../models/order.model.js";
 import OrderDetailModel from "../../models/orderdetail.model.js";
 import ProductModel from "../../models/product.model.js";
+import { CANCELLABLE_TIME } from "../../config/shop.config.js";
 
 export const placeOrder = async function (req, res) {
   let data = req.body.data;
@@ -50,6 +51,7 @@ export const getOrders = async function (req, res) {
           }
         })
       ).then((values) => {
+        console.log(values);
         return res.status(200).json({
           data: values
         })
@@ -81,4 +83,32 @@ export const getOrder = async function (req, res) {
       data: null
     })
   }
+}
+export const cancelOrder = async function (req, res) {
+  const customerId = req.user._id;
+  const orderId = req.body.orderId;
+  await OrderModel.findOne({
+    _id: orderId,
+    customerId
+  })
+    .then(result => {
+      if (result) {
+        const diffTime = Math.abs(Date.now() - result.orderedAt) / 3600000;
+        if (diffTime < CANCELLABLE_TIME) {
+          result.status = "CANCELLED"
+          result.save();
+          return res.status(200).json({
+            message: 'Your order is cancelled'
+          });
+        } else {
+          return res.status(401).json({
+            message: 'Your order cannot be canceled due to expired.'
+          });
+        }
+
+      }
+    })
+    .catch(err => res.status(500).json({
+      message: 'DB error - ' + err.message
+    }))
 }

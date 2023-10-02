@@ -216,6 +216,59 @@ class ApiService {
         });
     })
   }
+  async searchUser(query) {
+    return new Promise(async (resolve, reject) => {
+      await axios
+        .get(API_URL + '/m/order/searchuser',
+          {
+            params: { name: query },
+            headers: { ...authHeaderE() },
+          },
+        )
+        .then(response => {
+          const data = response;
+          resolve(data)
+        })
+        .catch(error => {
+          console.log(error);
+          reject(error);
+        });
+    })
+  }
+  async processOrder(query) {
+    return new Promise(async (resolve, reject) => {
+      await axios
+        .post(API_URL + '/m/order/process',
+          { ...query },
+          { headers: { ...authHeaderE() } },
+        )
+        .then(response => {
+          const data = response;
+          resolve(data)
+        })
+        .catch(error => {
+          console.log(error);
+          reject(error);
+        });
+    })
+  }
+  async cancelOrder(query) {
+    return new Promise(async (resolve, reject) => {
+      await axios
+        .post(API_URL + '/c/order/requestcancel',
+          { ...query },
+          { headers: { ...authHeader() } },
+        )
+        .then(response => {
+          const data = response;
+          resolve(data)
+        })
+        .catch(error => {
+          console.log(error);
+          reject(error);
+        });
+    })
+  }
 }
 
 export default new ApiService();

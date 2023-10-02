@@ -58,7 +58,25 @@ export default {
     toPrice(value = "") {
       return value.toLocaleString('vi', { style: 'currency', currency: 'VND' });
     },
-
+    requestCancelOrder() {
+      this.$refs.detailModal.hide();
+      this.$refs.confirmCancel.hide();
+      console.log("about to cancel order:" + this.currentOrderDetail._id);
+      this.$store.dispatch('order/cancelOrder', {
+        orderId: this.currentOrderDetail._id
+      }).then(res => {
+        this.$emit('notification', {
+          message: res.message,
+          type: "success"
+        })
+      })
+        .catch(res => {
+          this.$emit('notification', {
+            message: res.message,
+            type: 'error'
+          })
+        })
+    },
   },
   created() {
     this.listQueries = ref([]);
@@ -215,6 +233,29 @@ export default {
             </div>
           </div>
         </template>
+        <template #footer>
+          <div style="display: flex; justify-content: flex-end;">
+            <button @click="$refs.confirmCancel.show()" style="background-color: red; color: white">Cancel this
+              Order</button>
+            <button @click="$refs.detailModal.hide()">OK</button>
+          </div>
+        </template>
+
+      </Modal>
+      <Modal ref="confirmCancel">
+        <template #header>
+          <h3>Confirm cancel order</h3>
+        </template>
+        <template #body>
+          Are you sure to cancel this order?
+        </template>
+        <template #footer>
+          <div style="display: flex; justify-content: flex-end;">
+            <button @click="requestCancelOrder" style="background-color: red; color: white">Yes, I will cancel this
+              order</button>
+            <button @click="$refs.confirmCancel.hide()">No</button>
+          </div>
+        </template>
       </Modal>
     </Teleport>
   </main>
@@ -239,26 +280,49 @@ main>* {
 .tabs {
   display: flex;
   justify-content: center;
+  padding: 0 !important;
+  padding-top: 8px !important;
   flex-direction: row;
   flex-wrap: nowrap !important;
   overflow-x: auto;
   overflow-y: hidden;
+  background: linear-gradient(to bottom, transparent, transparent, var(--primary-color));
 }
 
 button.tab {
   flex: 1 0 auto;
   width: auto !important;
+  border-bottom-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
   margin: 0;
   text-wrap: nowrap;
-  transform: translateY(10%);
+  transition: all .3s ease-out;
+  box-sizing: border-box;
+  border: none;
+  box-shadow: inset 0 5px 5px #ddd;
+}
+
+button.tab:hover,
+button.tab:focus {
+  box-shadow: inset 0 0 0 white !important;
+  transform: scale(1);
+  text-shadow: 0 0 3px #888
 }
 
 button.tab.active {
   z-index: 10;
-  background-color: aqua;
-  transform: scaleY(1.1) translateY(-2%);
+  box-shadow: inset 0 0 0 white !important;
+  background-color: var(--primary-color);
+  color: #fff;
 }
 
+button.tab.active+button {
+  border-bottom-left-radius: 4px !important;
+}
+
+button.tab:has(+ button.tab.active) {
+  border-bottom-right-radius: 4px !important;
+}
 
 .section {
   background-color: #ffffff99;
